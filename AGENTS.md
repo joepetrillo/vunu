@@ -42,6 +42,7 @@ The Svelte MCP server (`svelte`) and the `svelte-code-writer` / `svelte-core-bes
 
 - Prefer deriving state from stored facts over storing extra state.
 - Database: `pg` pool via Drizzle's `node-postgres` driver, created once at module level (max 1–2), `DATABASE_URL` = Neon pooled string, `DATABASE_URL_UNPOOLED` for drizzle-kit only, registered with `attachDatabasePool`. Details: spec section 5b.
+- Deploys: only `main` deploys (`git.deploymentEnabled` in `vercel.json`). Other branches and PRs get CI but no Vercel build until Preview has its own database, secret, email key, and trusted host.
 - Schema changes: edit `src/lib/server/db/schema.ts`, then `bun run db:generate` (writes a SQL migration to `drizzle/`, committed) and `bun run db:migrate` (applies it to the dev database). Never `drizzle-kit push`. Production migrates on deploy (`vercel.json` runs `db:migrate` before `build`) while the previous deployment still serves traffic, so every migration must work with the old code too (add, then backfill, then remove in a later deploy).
 - Server code runs on Vercel Fluid compute: one instance serves many requests at once. Never keep per-request or per-user data in module-level variables; use `event.locals`. Shared clients (e.g. the database pool) belong at module level.
 - Runtime wiring belongs in `auth.ts` and `db/index.ts`; `create-auth.ts` accepts a database, secret, and sender so the same HTTP auth boundary can be tested without real email. Keep origin/CSRF checks enabled in tests: Better Auth 1.7.7's test defaults disable them. Hosted Preview/Production must have a Resend key; only local development may log OTPs.
@@ -62,7 +63,7 @@ Package manager is **bun**. Scripts are in `package.json`. `bun run verify` = li
 
 Env files: Vercel is the single source of every variable (database URLs from Neon's integration, plus secrets like `TMDB_READ_ACCESS_TOKEN`, added with `vercel env add` as a Development-only Secret since only local scripts use it). `vercel env pull` writes the Development values to `.env.local`, the only local env file; it's overwritten on every pull, so never hand-edit it, and don't create `.env` or `.env.development.local` (tools disagree on whether they win over `.env.local`, which once sent a migration to Production). `.env.example` lists every name with fake values. `drizzle.config.ts` loads `.env.local` explicitly because drizzle-kit only auto-loads `.env`. Nothing local writes to Production: it changes only through deploy-time migrations and (from stage 9) the scheduled catalog sync in GitHub Actions, which gets its values as repo secrets. Don't add local production scripts; if one is ever unavoidable, ask first, and never use `vercel env run -e production` (it overlays `.env.local`, so it silently targets dev).
 
-The disposable `TEST_DATABASE_URL` is a test-shell setting, not a live Vercel database setting. Its selector may read that name from `.env.local` if already present, but an explicit shell value wins and it never imports other file values into the process environment.
+The disposable `TEST_DATABASE_URL` is a test-shell setting (export it in the shell), not a Vercel setting. Tests read it only from the shell, never from `.env.local`.
 
 ## Before finishing any change
 

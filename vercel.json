@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "audit/correctness-security-2026-10-02": false
+      "main": true,
+      "**": false
     }
   },
   "buildCommand": "bun run db:migrate && bun run build"

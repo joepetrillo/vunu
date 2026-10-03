@@ -91,6 +91,6 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | `bun outdated` | Checks stable package updates without upgrading them |
 | `bun run outdated:next` | Checks remaining pinned prereleases (Drizzle ORM/Kit) without upgrading them |
 
-Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment. This audit prepares changes only; it does not deploy or complete the pending live-site checks.
+Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 
-The audit branch `audit/correctness-security-2026-10-02` has Vercel Git auto-deployment disabled in `vercel.json` so it can be published for code review without running hosted migrations. Other branches retain their existing deployment behavior. See [the independent review prompt](docs/AUDIT_REVIEW_PROMPT.md) for the handoff.
+Only `main` deploys: `vercel.json` disables Vercel Git deployments for every other branch (`"**": false`), so PR branches get CI but never a hosted build or migration. Revisit when Preview is provisioned.

@@ -1,6 +1,6 @@
 # Application audit
 
-Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Work is isolated in `audit/correctness-security-2026-10-02`. The user subsequently authorized publishing this branch for review; main remains unchanged, with no deployment or live service mutation.
+Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Branch: `audit/correctness-security-2026-10-02`, reviewed and merged to `main` by pull request on 2026-10-03 (see [Merge](#merge-2026-10-03)). This file is a historical record of the audit; current status lives in the spec's Progress list.
 
 The original version table and checks below describe the October 2 audit. The [stable-framework follow-up](#stable-framework-follow-up-2026-10-03) records the subsequently requested upgrade to SvelteKit 3.0.0 and Vercel adapter 7.0.0.
 
@@ -158,3 +158,14 @@ This repository's Vercel Git integration normally deploys branch pushes, and its
 Finalization reran frozen installation, the four migrations on fresh disposable PostgreSQL 18.6, format/lint, type checks (zero errors/warnings), all 90 regression tests, all 15 production-build Chromium journeys, and a separate production-mode Node 24 build with dummy email settings. All passed; `bun audit --json` again returned `{}`. No runtime application code or migration history changed during finalization. GitHub CI runs on main and pull requests, so publishing a branch alone does not constitute a remote CI run.
 
 Strict metavalidation of Vercel's entire published JSON schema failed on its unrelated queue-trigger definitions/draft declaration. Each of the three fields actually used (`$schema`, `git`, `buildCommand`) passed validation against its official property schema; exact branch-only disablement and the unchanged build command were also checked. No schema or application checks were weakened to hide a configuration error.
+
+## Merge (2026-10-03)
+
+A second review confirmed the findings and the stable upgrade against installed Better Auth 1.7.7 and SvelteKit 3.0.0 source. Before merging:
+
+- `vercel.json`'s branch-specific rule was replaced with `{"main": true, "**": false}`: only `main` deploys, so PR branches never run hosted migrations while Preview is unprovisioned. (`**`, not `*`, because `*` doesn't match branch names containing `/`.)
+- `docs/AUDIT_REVIEW_PROMPT.md` (a one-time handoff) was removed.
+- `testDatabaseUrl()` no longer falls back to `.env.local`; `TEST_DATABASE_URL` comes only from the shell.
+- `hooks.server.ts` notes that its `cache-control` header must be skipped for any future cacheable route, because Kit throws when a header is set twice.
+
+Merging deploys Production with no new migrations. Codes sent before the deploy were stored in plain text and won't verify afterward; request a new code. The remaining questions above (Resend domain, Preview, Drizzle `BEGIN` edge, retention) carry forward as spec follow-ups.
