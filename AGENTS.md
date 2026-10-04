@@ -6,7 +6,7 @@ SvelteKit app that finds movies nobody in a group has seen. Full spec, scope, an
 
 - I'm an Angular/React developer learning Svelte 5 and SvelteKit. Act as a mentor: explain decisions in plain language, give options with tradeoffs and a recommendation, and ask my opinion before locking in anything significant.
 - Work in small steps. Follow the build order in spec section 8 and don't implement ahead of the current stage. Check the Progress list there to see where we are. A stage is done only when its "Done when" checks pass; then commit, deploy, and update Progress. Before a stage, explain the concepts it teaches; after writing code, explain what each piece does and why. Point out where Svelte differs from Angular/React.
-- Respect the task's branch/deployment scope. An audit is not a new product stage and does not authorize a deployment or completing pending live checks.
+- Respect the task's branch/deployment scope. Reviews and audits are not product stages and don't authorize deploys or pending live checks.
 - Be concise. No filler.
 - Svelte 5, SvelteKit, Better Auth, and Drizzle change fast: check current docs rather than relying on memory.
 
@@ -25,6 +25,7 @@ The Svelte MCP server (`svelte`) and the `svelte-code-writer` / `svelte-core-bes
 
 - **Svelte 5:** look things up with `get-documentation` (call `list-sections` only when you don't know the section path). Load `svelte-core-bestpractices` before writing components.
 - **SvelteKit:** check the MCP documentation's major version before using it. If it describes Kit 2 (`$lib`, `$app/environment`, `svelte.config.js`), fetch the Kit 3 page instead: `https://svelte.dev/docs/kit/<slug>/llms.txt`, where `<slug>` is the MCP path without `kit/` (e.g. `form-actions`, `$app-env`). Migration guide: `https://svelte.dev/docs/kit/migrating-to-sveltekit-3/llms.txt`. Resolve disagreements against installed types and matching tagged source.
+- **Updating skills:** `bunx skills update` skips these two (upstream mirrors them in several folders; [vercel-labs/skills#2231](https://github.com/vercel-labs/skills/pull/2231)). Until that ships, re-add them: `bunx skills add https://github.com/sveltejs/ai-tools/tree/main/plugins/claude/svelte/skills --skill svelte-core-bestpractices --skill svelte-code-writer`.
 - **Validate:** after creating or editing any `.svelte`, `.svelte.ts`, or `.svelte.js` file, run `svelte-autofixer` on it and repeat until it returns no issues or suggestions. If the MCP isn't connected, use the CLI from `svelte-code-writer` (`npx @sveltejs/mcp svelte-autofixer <path>`).
 - **`playground-link`:** only for code not written to project files, and only after asking me.
 
@@ -42,7 +43,7 @@ The Svelte MCP server (`svelte`) and the `svelte-code-writer` / `svelte-core-bes
 
 - Prefer deriving state from stored facts over storing extra state.
 - Database: `pg` pool via Drizzle's `node-postgres` driver, created once at module level (max 1–2), `DATABASE_URL` = Neon pooled string, `DATABASE_URL_UNPOOLED` for drizzle-kit only, registered with `attachDatabasePool`. Details: spec section 5b.
-- Deploys: only `main` deploys (`git.deploymentEnabled` in `vercel.json`). Other branches and PRs get CI but no Vercel build until Preview has its own database, secret, email key, and trusted host.
+- Only `main` deploys (`vercel.json`); PRs get CI only. Why and when that changes: spec section 5b.
 - Schema changes: edit `src/lib/server/db/schema.ts`, then `bun run db:generate` (writes a SQL migration to `drizzle/`, committed) and `bun run db:migrate` (applies it to the dev database). Never `drizzle-kit push`. Production migrates on deploy (`vercel.json` runs `db:migrate` before `build`) while the previous deployment still serves traffic, so every migration must work with the old code too (add, then backfill, then remove in a later deploy).
 - Server code runs on Vercel Fluid compute: one instance serves many requests at once. Never keep per-request or per-user data in module-level variables; use `event.locals`. Shared clients (e.g. the database pool) belong at module level.
 - Runtime wiring belongs in `auth.ts` and `db/index.ts`; `create-auth.ts` accepts a database, secret, and sender so the same HTTP auth boundary can be tested without real email. Keep origin/CSRF checks enabled in tests: Better Auth 1.7.7's test defaults disable them. Hosted Preview/Production must have a Resend key; only local development may log OTPs.
@@ -53,18 +54,22 @@ The Svelte MCP server (`svelte`) and the `svelte-code-writer` / `svelte-core-bes
 - One active watch session per group. Closed watch sessions reject all changes.
 - Deck order: previously matched last, then most confirmations, then TMDB **vote count** (not "popularity"), then movie ID. No cursors or offsets: fetch the top eligible unanswered movies, excluding ones already on screen.
 - Every server operation checks the permission it needs (answering requires an active participation; see spec section 4). The acting user comes from the auth session, never from request data.
-- Every application-domain mutation carries a client action ID and runs through `runAction` (`#lib/server/actions.ts`): logged in `actions` and applied in one transaction that bumps every affected counter (`watch_sessions.revision` and/or `users.seen_version`). Better Auth owns its separate authentication protocol. The browser keeps an ID until the server answers, so a retry resends it.
-- All seen-list changes go through one server module: `#lib/server/seen-list.ts`.
+- Every application-domain mutation carries a client action ID and runs through `runAction` (`#lib/server/actions.ts`): logged in `actions` and applied in one transaction that bumps every affected counter (`watch_sessions.revision` and/or `users.seen_version`). Better Auth owns its separate authentication protocol. The browser keeps an ID until the server answers, so a retry resends it. ESLint rejects writes to `actions` outside `actions.ts`.
+- All seen-list changes go through one server module: `#lib/server/seen-list.ts` (ESLint rejects writes to `seenMovies` elsewhere; tests are exempt).
 - Live updates go through `notifyWatchSessionChanged()` (server) and `subscribeToWatchSession()` (client). Polling compares a fingerprint of watch session revision + participants' seen versions; nothing else may poll or depend on the mechanism.
 
 ## Commands
 
-Package manager is **bun**. Scripts are in `package.json`. `bun run verify` = lint + svelte-check + unit/browser/database tests. Database tests and e2e require an explicitly disposable `TEST_DATABASE_URL` and never fall back to `DATABASE_URL`. Use `bun run db:migrate:test` to apply committed migrations without loading Development credentials. Helpers in `#lib/server/testing/` create and delete unique fixtures; CI uses throwaway Postgres 18. Playwright overrides app database, auth secret, and email settings; e2e decrypts OTP fixtures with that test secret, never a live secret. See README for setup. Vitest defaults to watch mode, so pass `--run` (`bun run test:unit --run`).
+Package manager is **bun**. Command list and setup: README "Commands" and "Safe test setup".
 
-Env files: Vercel is the single source of every variable (database URLs from Neon's integration, plus secrets like `TMDB_READ_ACCESS_TOKEN`, added with `vercel env add` as a Development-only Secret since only local scripts use it). `vercel env pull` writes the Development values to `.env.local`, the only local env file; it's overwritten on every pull, so never hand-edit it, and don't create `.env` or `.env.development.local` (tools disagree on whether they win over `.env.local`, which once sent a migration to Production). `.env.example` lists every name with fake values. `drizzle.config.ts` loads `.env.local` explicitly because drizzle-kit only auto-loads `.env`. Nothing local writes to Production: it changes only through deploy-time migrations and (from stage 9) the scheduled catalog sync in GitHub Actions, which gets its values as repo secrets. Don't add local production scripts; if one is ever unavoidable, ask first, and never use `vercel env run -e production` (it overlays `.env.local`, so it silently targets dev).
+- `bun run verify` = frozen install + lint + svelte-check + Vitest (`--run`; Vitest defaults to watch mode). The pre-commit hook runs `bun run lint`.
+- Database tests and e2e need a disposable `TEST_DATABASE_URL` exported in the shell. They never fall back to `DATABASE_URL` or read `.env.local`. Apply migrations to it with `bun run db:migrate:test`, never `db:migrate`.
 
-The disposable `TEST_DATABASE_URL` is a test-shell setting (export it in the shell), not a Vercel setting. Tests read it only from the shell, never from `.env.local`.
+Env files (why: spec section 5b):
+
+- Vercel is the source of every variable. `vercel env pull` writes Development values to `.env.local`, overwritten on each pull: never hand-edit it, never create `.env` or `.env.development.local`. `vercel env ls` lists names per environment (read-only).
+- Nothing local writes to Production. Don't add local production scripts (ask first if one seems unavoidable), and never use `vercel env run -e production` (it silently targets dev).
 
 ## Before finishing any change
 
-Run `bun run verify` (plus e2e tests when relevant) and show the results. Fix root causes; don't suppress errors.
+Run `bun run verify` (plus e2e tests when relevant) and show the results. If no `TEST_DATABASE_URL` is set, say which suites didn't run instead of reporting a pass. Fix root causes; don't suppress errors.

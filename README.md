@@ -79,7 +79,7 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | Command | Purpose/side effects |
 | --- | --- |
 | `bun run dev` | Local Vite server, port 5173 |
-| `bun run verify` | Format/lint, type check, Vitest unit/browser/database tests |
+| `bun run verify` | Frozen install (so checks run against the lockfile's versions), format/lint, type check, Vitest unit/browser/database tests |
 | `bun run test:e2e` | Installs Chromium if needed, builds, and runs Playwright on port 4173 with isolated settings |
 | `bun run build` / `bun run preview` | Build Vercel output / serve the local production build |
 | `bun run fix` | Writes formatting and ESLint fixes |
@@ -90,6 +90,9 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | `bun run db:studio` | Opens a database editor for the configured database |
 | `bun outdated` | Checks stable package updates without upgrading them |
 | `bun run outdated:next` | Checks remaining pinned prereleases (Drizzle ORM/Kit) without upgrading them |
+| `vercel env ls` | Lists variable names per Vercel environment, without values (read-only) |
+
+`bun install` sets up a pre-commit hook ([simple-git-hooks](https://github.com/toplenboren/simple-git-hooks), configured in `package.json`) that runs `bun run lint`. Skip it once with `git commit --no-verify`. ESLint also enforces two write paths: only `seen-list.ts` writes `seenMovies`, and only `actions.ts` writes `actions` (tests are exempt).
 
 Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 
