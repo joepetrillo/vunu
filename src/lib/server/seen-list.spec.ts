@@ -108,6 +108,28 @@ describe("seen list", () => {
     expect(await seenVersion(change.userId)).toBe(1);
   });
 
+  it("doesn't double-count concurrent distinct actions adding the same movie", async () => {
+    const outcomes = await Promise.all([
+      addToSeenList(db, change),
+      addToSeenList(db, { ...change, actionId: crypto.randomUUID() }),
+    ]);
+    expect(outcomes).toEqual(["applied", "applied"]);
+    expect(await seenMovieIds(change.userId)).toEqual([change.movieId]);
+    expect(await seenVersion(change.userId)).toBe(1);
+  });
+
+  it("doesn't lose version increments when different movies are saved concurrently", async () => {
+    const movieId = await fixtures.movie();
+    await Promise.all([
+      addToSeenList(db, change),
+      addToSeenList(db, { ...change, actionId: crypto.randomUUID(), movieId }),
+    ]);
+    expect(await seenMovieIds(change.userId)).toEqual(
+      [change.movieId, movieId].sort()
+    );
+    expect(await seenVersion(change.userId)).toBe(2);
+  });
+
   it("removes a movie and bumps seen_version; a retry changes nothing", async () => {
     await addToSeenList(db, change);
     const removal = { ...change, actionId: crypto.randomUUID() };

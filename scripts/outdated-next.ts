@@ -1,5 +1,5 @@
 /**
- * Checks our pinned pre-release packages (e.g. `3.0.0-next.30`, `1.0.0-rc.4`)
+ * Checks our pinned pre-release packages (currently Drizzle `1.0.0-rc.4`)
  * against npm. `bun outdated` can't do this: it compares against each package's
  * `latest` tag, which still points at the old stable version while a new major
  * is in pre-release.

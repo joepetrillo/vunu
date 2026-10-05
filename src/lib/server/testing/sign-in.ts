@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { symmetricDecrypt } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 
 import type { Db } from "#lib/server/db/client.ts";
@@ -8,23 +9,28 @@ import {
   verifications,
 } from "#lib/server/db/schema.ts";
 
+import { TEST_AUTH_SECRET } from "./environment.ts";
+
 // Sign-in helpers for end-to-end tests. Locally codes aren't emailed, so tests
 // read them from the database.
 
 /**
  * Reads the code the server just created for `email`. Coupled to Better
- * Auth's storage format (identifier "sign-in-otp-<email>", value
- * "<code>:<attempts>", stored in plain text by default): if a Better Auth
- * upgrade breaks this, check there.
+ * Auth 1.7.7's storage format (identifier "sign-in-otp-<email>", value
+ * "<encrypted-code>:<attempts>", with newest created_at winning). Only the
+ * isolated browser server uses TEST_AUTH_SECRET; never read live OTPs here.
  */
 export async function readSignInCode(db: Db, email: string): Promise<string> {
   const row = await db.query.verifications.findFirst({
     where: { identifier: `sign-in-otp-${email}` },
+    orderBy: { createdAt: "desc" },
   });
-  const code = row?.value.split(":")[0];
-  if (code === undefined || !/^\d{6}$/.test(code)) {
+  const value = row?.value.split(":")[0];
+  if (value === undefined) {
     throw new Error(`No sign-in code stored for ${email}.`);
   }
+  const code = await symmetricDecrypt({ key: TEST_AUTH_SECRET, data: value });
+  if (!/^\d{6}$/.test(code)) throw new Error("Invalid test sign-in code.");
   return code;
 }
 

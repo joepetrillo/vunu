@@ -47,13 +47,13 @@
   }
 </script>
 
-<svelte:head><title>Seen movies · Unseen</title></svelte:head>
+<svelte:head><title>Seen movies · Vunu</title></svelte:head>
 
 <main class="mx-auto max-w-xl p-4">
   <a class="text-sm underline" href={resolve("/")}>Home</a>
   <h1 class="mt-2 text-2xl font-bold">Seen movies</h1>
   <p class="mt-1 text-sm text-neutral-600">
-    Unseen never deals you a movie on your list.
+    Vunu never deals you a movie on your list.
   </p>
 
   <nav class="mt-4 flex gap-2 border-b" aria-label="Lists">

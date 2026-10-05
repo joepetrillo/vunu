@@ -4,7 +4,14 @@ export const SIGN_IN_PATH = "/sign-in";
 
 /** The sign-in URL for a signed-out visitor, remembering where they were going. */
 export function signInPath(requested: URL): string {
-  const target = requested.pathname + requested.search;
+  const params = new URLSearchParams(requested.search);
+  // An expired-session POST should return to the page, not carry its reserved
+  // named action into the next form submission. Other filters stay intact.
+  for (const name of [...params.keys()]) {
+    if (name.startsWith("/")) params.delete(name);
+  }
+  const search = params.toString();
+  const target = requested.pathname + (search === "" ? "" : `?${search}`);
   if (target === "/") return SIGN_IN_PATH;
   const query = new URLSearchParams({ redirectTo: target }).toString();
   return `${SIGN_IN_PATH}?${query}`;

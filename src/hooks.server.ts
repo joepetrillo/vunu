@@ -19,6 +19,10 @@ const betterAuthEndpoints: Handle = ({ event, resolve }) =>
 // behind client-side navigation. Guarding here (not in a layout's `load`) also
 // covers form actions and +server.ts endpoints, which layout loads never run for.
 const signInGuard: Handle = async ({ event, resolve }) => {
+  // HTML and navigation data include the current user's identity/list.
+  // Kit throws if a header is set twice, so a future cacheable route must be
+  // skipped here rather than setting its own cache-control in `load`.
+  event.setHeaders({ "cache-control": "private, no-store" });
   // `locals` is per request, so concurrent requests on one instance never see
   // each other's user. Reads the session cookie and looks the session up.
   const result = await auth.api.getSession({ headers: event.request.headers });

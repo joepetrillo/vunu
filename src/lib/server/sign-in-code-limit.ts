@@ -8,9 +8,8 @@ export const WINDOW_MINUTES = 10;
 
 /**
  * Records one code request for `email` and reports whether it's within the
- * limit. Stops someone from flooding one inbox, or from repeatedly replacing a
- * person's pending code (each send invalidates the previous one), from any
- * number of IPs.
+ * limit. Stops someone from flooding one inbox from any number of IPs.
+ * A refused request never reaches the plugin or changes the pending code.
  */
 export async function consumeSignInCodeRequest(
   db: Db,

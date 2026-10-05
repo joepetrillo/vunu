@@ -58,7 +58,6 @@ export const movieGenres = pgTable(
   ]
 );
 
-export type Movie = typeof movies.$inferSelect;
 export type NewMovie = typeof movies.$inferInsert;
 
 // Better Auth's tables, from `bunx auth generate` (Better Auth 1.7, email OTP

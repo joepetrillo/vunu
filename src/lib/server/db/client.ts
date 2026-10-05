@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { DatabaseError, Pool } from "pg";
 
 import { relations } from "./relations.ts";
 import { withVerifiedTls } from "./url.ts";
@@ -10,6 +10,14 @@ export function createDb(connectionString: string, maxConnections: number) {
   const pool = new Pool({
     connectionString: withVerifiedTls(connectionString),
     max: maxConnections,
+    connectionTimeoutMillis: 10_000,
+  });
+  // pg emits errors from idle clients on the pool. Without a listener Node
+  // throws an unhandled error; never log query/connection strings or payloads.
+  pool.on("error", (error) => {
+    console.error("[db] An idle connection failed.", {
+      code: error instanceof DatabaseError ? error.code : undefined,
+    });
   });
   return { pool, db: drizzle({ client: pool, relations }) };
 }

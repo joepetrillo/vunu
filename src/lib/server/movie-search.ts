@@ -15,6 +15,9 @@ import type { Db } from "#lib/server/db/client.ts";
 import { movieGenres, movies, seenMovies } from "#lib/server/db/schema.ts";
 
 export const PAGE_SIZE = 30;
+// OFFSET is calculated in JavaScript before pg receives it. Keep that integer
+// exact without choosing an arbitrary cap on how much of the catalog is browsable.
+export const MAX_PAGE = Math.floor(Number.MAX_SAFE_INTEGER / PAGE_SIZE) + 1;
 
 export interface MovieSearch {
   /** The user's seen list (newest first) or the whole catalog (most-voted first). */

@@ -1,11 +1,12 @@
 import { fail } from "@sveltejs/kit";
-import { eq } from "drizzle-orm";
+import { DrizzleQueryError, eq } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
+import { DatabaseError } from "pg";
 import { z } from "zod";
 
 import { db } from "#lib/server/db/index.ts";
 import { genres, movies, seenMovies } from "#lib/server/db/schema.ts";
-import { searchMovies } from "#lib/server/movie-search.ts";
+import { MAX_PAGE, searchMovies } from "#lib/server/movie-search.ts";
 import { requireUser } from "#lib/server/require-user.ts";
 import { addToSeenList, removeFromSeenList } from "#lib/server/seen-list.ts";
 
@@ -30,7 +31,10 @@ const decades = Array.from(
 const searchSchema = z.object({
   scope: z.enum(["mine", "all"]).catch("mine"),
   title: z.string().trim().max(100).catch(""),
-  genre: createSelectSchema(genres).shape.id.optional().catch(undefined),
+  genre: createSelectSchema(genres)
+    .shape.id.positive()
+    .optional()
+    .catch(undefined),
   decade: z.coerce
     .number()
     .int()
@@ -39,7 +43,7 @@ const searchSchema = z.object({
     .max(latestDecade)
     .optional()
     .catch(undefined),
-  page: z.coerce.number().int().min(1).catch(1),
+  page: z.coerce.number().int().min(1).max(MAX_PAGE).catch(1),
 });
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -68,8 +72,13 @@ async function changeSeenList(
   change: typeof addToSeenList
 ) {
   const user = requireUser(locals);
+  // Malformed multipart bodies can fail before Zod sees any fields.
+  const fields = await request.formData().catch((error: unknown) => {
+    if (error instanceof TypeError) return null;
+    throw error;
+  });
   const form = seenListFormSchema.safeParse(
-    Object.fromEntries(await request.formData())
+    fields === null ? null : Object.fromEntries(fields)
   );
   if (!form.success) {
     return fail(400, {
@@ -77,15 +86,31 @@ async function changeSeenList(
     });
   }
 
-  const outcome = await change(db, { userId: user.id, ...form.data });
-  // Only a bug or a tampered request reuses an action ID for something else.
-  if (outcome === "conflict") {
-    return fail(409, {
-      message: "Something went wrong. Reload the page and try again.",
-    });
+  try {
+    const outcome = await change(db, { userId: user.id, ...form.data });
+    // Only a bug or a tampered request reuses an action ID for something else.
+    if (outcome === "conflict") {
+      return fail(409, {
+        message: "Something went wrong. Reload the page and try again.",
+      });
+    }
+    // "applied" and "duplicate" both mean the change is saved; a duplicate was
+    // a retry of a request that already succeeded.
+  } catch (error) {
+    // The action's FK is checked before applying a change. Treat a movie that
+    // isn't in the catalog as an expected failure; propagate other DB errors.
+    if (
+      error instanceof DrizzleQueryError &&
+      error.cause instanceof DatabaseError &&
+      error.cause.code === "23503" &&
+      error.cause.constraint === "actions_movie_id_movies_id_fkey"
+    ) {
+      return fail(404, {
+        message: "That movie is no longer in the catalog. Reload the page.",
+      });
+    }
+    throw error;
   }
-  // "applied" and "duplicate" both mean the change is saved; a duplicate was
-  // a retry of a request that already succeeded.
 }
 
 export const actions = {

@@ -6,8 +6,12 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
+    timeout-minutes: 15
     # Pinned rather than ubuntu-latest (moving to Ubuntu 26 from Oct 2026): Playwright's
     # --with-deps system packages can lag a new Ubuntu release. Revisit at launch (spec stage 10).
     runs-on: ubuntu-24.04
@@ -27,13 +31,16 @@ jobs:
           --health-cmd "pg_isready -U ci" --health-interval 2s --health-timeout 5s --health-retries 15
     env:
       # src/env.ts requires these, and the build checks them. Both database URLs point at the
-      # service above (no pooler here, so they're the same). CI never signs anyone in, so the
-      # secret is a placeholder. Vercel gets the real values.
+      # service above (no pooler here, so they're the same). Sign-in tests use
+      # isolated fixture secrets and terminal/mock delivery, never Resend.
       DATABASE_URL: postgres://ci:ci@localhost:5432/ci
       DATABASE_URL_UNPOOLED: postgres://ci:ci@localhost:5432/ci
+      TEST_DATABASE_URL: postgres://ci:ci@localhost:5432/ci
       BETTER_AUTH_SECRET: ci-placeholder-secret-at-least-32-characters
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       # Bun installs and runs scripts, but Vite and SvelteKit run on Node (their bins use
       # `#!/usr/bin/env node`). Pin it so CI doesn't depend on the runner's preinstalled version.
       - uses: actions/setup-node@v7
@@ -50,6 +57,7 @@ jobs:
       - run: bun run lint
       - run: bun run check
       # The same committed migrations Vercel applies on deploy.
-      - run: bun run db:migrate
+      - run: bun run db:migrate:test
       - run: bun run test:unit --run
-      - run: bun run build
+      # Includes a production build and runs against the same throwaway DB.
+      - run: bun run test:e2e

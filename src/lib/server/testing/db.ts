@@ -1,34 +1,20 @@
 import { randomInt } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
-import { parseEnv } from "node:util";
 
 import { inArray } from "drizzle-orm";
-import { z } from "zod";
 
 import { createDb, type Db } from "#lib/server/db/client.ts";
-import { movies, type NewMovie, users } from "#lib/server/db/schema.ts";
+import { genres, movies, type NewMovie, users } from "#lib/server/db/schema.ts";
+
+import { testDatabaseUrl } from "./environment.ts";
 
 // Shared by tests that need a real database (Vitest and Playwright alike).
 
 /**
- * Locally: the dev database, from .env.local (Vitest and Playwright don't load
- * it into `process.env` the way Vite and Bun do). In CI: a throwaway Postgres
- * (see .github/workflows/ci.yml). Two connections, so tests can run
- * transactions side by side.
+ * TEST_DATABASE_URL must explicitly select a disposable database, locally and
+ * in CI. Two connections let tests run transactions side by side.
  */
 export function connectTestDb() {
-  if (existsSync(".env.local")) {
-    Object.assign(process.env, parseEnv(readFileSync(".env.local", "utf8")));
-  }
-  const { DATABASE_URL } = z
-    .object({
-      DATABASE_URL: z.url({
-        protocol: /^postgres(ql)?$/,
-        error: "DATABASE_URL is not set. Run `vercel env pull`.",
-      }),
-    })
-    .parse(process.env);
-  return createDb(DATABASE_URL, 2);
+  return createDb(testDatabaseUrl(), 2);
 }
 
 /**
@@ -41,11 +27,12 @@ export function testMovieId(): number {
 
 /**
  * Creates users and movies for a test file and deletes them afterwards, so
- * tests can share the dev database without seeing each other's rows.
+ * test files can share a disposable database without seeing each other's rows.
  */
 export function createFixtures(db: Db) {
   const userIds: string[] = [];
   const movieIds: number[] = [];
+  const genreIds: number[] = [];
 
   return {
     async user(): Promise<string> {
@@ -71,6 +58,13 @@ export function createFixtures(db: Db) {
       return id;
     },
 
+    async genre(): Promise<number> {
+      const id = testMovieId();
+      await db.insert(genres).values({ id, name: `Test genre ${String(id)}` });
+      genreIds.push(id);
+      return id;
+    },
+
     // Users first: deleting them cascades to their seen movies and actions,
     // which would otherwise block deleting the movies.
     async cleanUp(): Promise<void> {
@@ -79,6 +73,9 @@ export function createFixtures(db: Db) {
       }
       if (movieIds.length > 0) {
         await db.delete(movies).where(inArray(movies.id, movieIds));
+      }
+      if (genreIds.length > 0) {
+        await db.delete(genres).where(inArray(genres.id, genreIds));
       }
     },
   };

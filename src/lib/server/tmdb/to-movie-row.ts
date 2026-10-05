@@ -49,6 +49,7 @@ export function toMovieRow(
       imdbId: details.imdb_id === "" ? null : details.imdb_id,
       syncedAt,
     },
-    genreIds: details.genres.map((g) => g.id),
+    // Junction rows are unique per movie/genre even if the provider repeats one.
+    genreIds: [...new Set(details.genres.map((g) => g.id))],
   };
 }

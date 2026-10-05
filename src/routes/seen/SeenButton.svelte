@@ -33,13 +33,22 @@
 
   // A relative action like "?/add" would replace the page's query string and
   // lose the search, so keep the query and add the action's name to it.
-  let action = $derived(
-    page.url.search === "" ? `?/${change}` : `${page.url.search}&/${change}`
-  );
+  let action = $derived.by(() => {
+    // Kit picks the first named action. A restored/shared URL may still have
+    // one, so remove it before appending the current change.
+    const search = new URLSearchParams(
+      [...page.url.searchParams].filter(([name]) => !name.startsWith("/"))
+    ).toString();
+    return search === "" ? `?/${change}` : `?${search}&/${change}`;
+  });
 
   // `use:enhance` sends the form with fetch instead of a full page load. This
   // runs before it's sent; the function it returns runs with the result.
-  const submit: SubmitFunction = ({ formData }) => {
+  const submit: SubmitFunction = ({ formData, cancel }) => {
+    if (saving) {
+      cancel();
+      return;
+    }
     // Captured now: `change` follows the page data, which another row's save
     // can refresh while this request is out.
     const submitted = change;
@@ -51,21 +60,34 @@
     failure = null;
 
     return async ({ result, update }) => {
-      if (result.type === "error") {
-        failure = { change: submitted, message: "Couldn't save. Try again." };
-      } else {
-        unanswered = null;
-        if (result.type === "failure") {
-          failure = {
-            change: submitted,
-            message: result.data?.message ?? "Couldn't save. Try again.",
-          };
+      try {
+        if (result.type === "error") {
+          failure = { change: submitted, message: "Couldn't save. Try again." };
         } else {
-          // Re-runs the page's load, so the list shows the change.
-          await update();
+          unanswered = null;
+          if (result.type === "failure") {
+            failure = {
+              change: submitted,
+              message: result.data?.message ?? "Couldn't save. Try again.",
+            };
+          } else {
+            // Re-runs the page's load, so the list shows the change.
+            try {
+              await update();
+            } catch {
+              failure = {
+                change: submitted,
+                message:
+                  result.type === "success"
+                    ? "Saved, but couldn't refresh. Reload the page."
+                    : "Couldn't open the page. Reload to continue.",
+              };
+            }
+          }
         }
+      } finally {
+        saving = false;
       }
-      saving = false;
     };
   };
 </script>

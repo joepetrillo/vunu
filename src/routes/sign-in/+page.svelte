@@ -1,5 +1,6 @@
 <script lang="ts">
   import { refreshAll } from "$app/navigation";
+  import { tick } from "svelte";
 
   import { authClient } from "#lib/auth-client.ts";
 
@@ -46,11 +47,12 @@
       const { error } = await request();
       return error === null ? null : describeError(error);
     } catch {
-      return "Couldn't reach Unseen. Check your connection and try again.";
+      return "Couldn't reach Vunu. Check your connection and try again.";
     }
   }
 
   async function requestCode(): Promise<boolean> {
+    if (pending !== null) return false;
     pending = "send";
     errorMessage = await attempt(() =>
       authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
@@ -62,7 +64,12 @@
   async function submitEmail(event: SubmitEvent) {
     // The browser would otherwise submit the form as a full page request.
     event.preventDefault();
-    if (await requestCode()) step = "code";
+    if (await requestCode()) {
+      step = "code";
+      // The old form is removed. Focus the replacement after Svelte renders it.
+      await tick();
+      document.querySelector<HTMLInputElement>('input[name="code"]')?.focus();
+    }
   }
 
   async function resendCode() {
@@ -71,6 +78,7 @@
 
   async function submitCode(event: SubmitEvent) {
     event.preventDefault();
+    if (pending !== null) return;
     pending = "verify";
     resent = false;
     errorMessage = await attempt(() =>
@@ -83,24 +91,34 @@
     // The response set the session cookie. Re-running the loads sends a request
     // through hooks.server.ts, which now sees the user and redirects to the
     // page they asked for. `pending` stays set until the page changes.
-    await refreshAll();
+    try {
+      await refreshAll();
+    } catch {
+      errorMessage =
+        "Signed in, but couldn't open the page. Reload to continue.";
+      pending = null;
+    }
   }
 
-  function useDifferentEmail() {
+  async function useDifferentEmail() {
+    if (pending !== null) return;
     step = "email";
     code = "";
     errorMessage = null;
     resent = false;
+    await tick();
+    document.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
   }
 </script>
 
-<svelte:head><title>Sign in · Unseen</title></svelte:head>
+<svelte:head><title>Sign in · Vunu</title></svelte:head>
 
 <main class="mx-auto max-w-sm p-4">
-  <h1 class="text-2xl font-bold">Sign in to Unseen</h1>
+  <h1 class="text-2xl font-bold">Sign in to Vunu</h1>
 
   {#if step === "email"}
-    <form class="mt-6 flex flex-col gap-3" onsubmit={submitEmail}>
+    <!-- Before hydration, POST keeps sensitive fields out of URLs/logs. -->
+    <form method="POST" class="mt-6 flex flex-col gap-3" onsubmit={submitEmail}>
       <label class="flex flex-col gap-1">
         <span class="text-sm font-medium">Email</span>
         <input
@@ -109,6 +127,7 @@
           name="email"
           autocomplete="email"
           required
+          disabled={pending !== null}
           bind:value={email}
         />
       </label>
@@ -124,7 +143,7 @@
       We sent a 6-digit code to <strong>{email}</strong>. It expires in 5
       minutes.
     </p>
-    <form class="mt-4 flex flex-col gap-3" onsubmit={submitCode}>
+    <form method="POST" class="mt-4 flex flex-col gap-3" onsubmit={submitCode}>
       <label class="flex flex-col gap-1">
         <span class="text-sm font-medium">Code</span>
         <!-- one-time-code lets phones offer the code from the email. The
@@ -139,6 +158,7 @@
           pattern={"[0-9]{6}"}
           maxlength="6"
           required
+          disabled={pending !== null}
           bind:value={code}
         />
       </label>
@@ -167,7 +187,8 @@
     {/if}
     <button
       type="button"
-      class="mt-4 text-sm underline"
+      class="mt-4 text-sm underline disabled:opacity-50"
+      disabled={pending !== null}
       onclick={useDifferentEmail}
     >
       Use a different email
