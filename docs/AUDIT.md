@@ -1,6 +1,6 @@
 # Application audit
 
-Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Branch: `audit/correctness-security-2026-10-02`, reviewed and merged to `main` by pull request on 2026-10-03 (see [Merge](#merge-2026-10-03)). This file is a historical record of the audit; current status lives in the spec's Progress list.
+Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Branch: `audit/correctness-security-2026-10-02`, reviewed and prepared for merge on 2026-10-03 (see [Merge preparation](#merge-preparation-2026-10-03)); [PR #1](https://github.com/joepetrillo/vunu/pull/1) is still open as of 2026-10-05. This file is a historical record of the audit; current status lives in the spec's Progress list.
 
 The original version table and checks below describe the October 2 audit. The [stable-framework follow-up](#stable-framework-follow-up-2026-10-03) records the subsequently requested upgrade to SvelteKit 3.0.0 and Vercel adapter 7.0.0.
 
@@ -128,7 +128,7 @@ Coverage is behavioral: real local PostgreSQL transactions/constraints and concu
 ## Remaining questions and separate rollout work
 
 1. **Encrypted OTP cutover:** no schema migration is needed, but pending plaintext OTPs from the prior code are incompatible with encrypted storage. Coordinate deployments sharing the verification table; do not run plaintext/encrypted auth versions concurrently. Allow the existing five-minute codes to expire during a quiet cutover and request fresh codes afterward. If overlapping deployments are required, design a separate compatible transition. Keep the existing auth secret to preserve sessions. No live verification rows were cleared or secrets rotated here.
-2. **Email/domain and Preview:** the current `onboarding@resend.dev` sender still delivers only to the Resend account owner. Verify a domain and change the sender before a second person signs up, as the spec already requires. Configure an isolated Preview database/secret/email key and explicit Preview/custom host before using previews. This audit neither changes live settings nor broadens trusted hosts. Confirm HTTPS cookies, proxy IP handling, hosted pool lifecycle/TLS, migration history, and email delivery in the separately authorized live-site check.
+2. **Email/domain and Preview:** at audit time, `onboarding@resend.dev` only delivered to the Resend account owner. For the 2026-10-05 Vunu migration, Resend confirms `vunu.app` is verified; the migration changes this branch's sender to `Vunu <hello@vunu.app>`, with explicit trust for the new custom domains. Hosted delivery remains to be checked after merge. Configure an isolated Preview database/secret/email key and explicit Preview/custom host before using previews. The original audit did not change live settings or broaden trusted hosts. Confirm HTTPS cookies, proxy IP handling, hosted pool lifecycle/TLS, migration history, and email delivery in the separately authorized live-site check.
 3. **Unresolved RC driver edge (source confidence high; runtime consequence unverified):** Drizzle rc.4's node-postgres implementation executes `BEGIN` before its `try/finally` release block. If that initial statement rejects, the source does not explicitly release its borrowed client. Ordinary transaction rollback/concurrency are covered; initial-BEGIN transport failure and its pool-capacity consequence are not reproduced here. Do not claim the new pool timeout fixes this upstream edge. Verify/follow the tagged driver behavior and prefer a narrowly compatible upstream fix over monkey-patching the pool/ORM.
 4. **Retention:** Better Auth 1.7.7 prunes expired database rate-limit rows; the old spec claim that these never prune was inaccurate. App-specific `sign_in_code_limits` retains one address per requester, and action logs grow by design for retry/undo semantics. Decide retention/pruning alongside stage 9 jobs, without removing required action history. No live cleanup was run.
 5. **Product/runtime gaps:** signup stays open; no new allowlist, invite model, groups, watch sessions, jobs, or webhooks were invented. Bun remains unpinned in CI. Full catalog query performance, provider field compatibility for a new import, non-Chromium/screen-reader testing, and hosted Vercel/Neon/Resend behavior remain unverified. The schema/migration files were reviewed and applied locally, not compared to the deployed database. Stage 4's live-site check remains pending.
@@ -159,7 +159,7 @@ Finalization reran frozen installation, the four migrations on fresh disposable 
 
 Strict metavalidation of Vercel's entire published JSON schema failed on its unrelated queue-trigger definitions/draft declaration. Each of the three fields actually used (`$schema`, `git`, `buildCommand`) passed validation against its official property schema; exact branch-only disablement and the unchanged build command were also checked. No schema or application checks were weakened to hide a configuration error.
 
-## Merge (2026-10-03)
+## Merge preparation (2026-10-03)
 
 A second review confirmed the findings and the stable upgrade against installed Better Auth 1.7.7 and SvelteKit 3.0.0 source. Before merging:
 
@@ -168,4 +168,4 @@ A second review confirmed the findings and the stable upgrade against installed 
 - `testDatabaseUrl()` no longer falls back to `.env.local`; `TEST_DATABASE_URL` comes only from the shell.
 - `hooks.server.ts` notes that its `cache-control` header must be skipped for any future cacheable route, because Kit throws when a header is set twice.
 
-Merging deploys Production with no new migrations. Codes sent before the deploy were stored in plain text and won't verify afterward; request a new code. The remaining questions above (Resend domain, Preview, Drizzle `BEGIN` edge, retention) carry forward as spec follow-ups.
+Merging deploys Production with no new migrations. Codes sent before the deploy were stored in plain text and won't verify afterward; request a new code. The remaining questions above (hosted email verification, Preview, Drizzle `BEGIN` edge, retention) carry forward as spec follow-ups. PR #1 is awaiting merge as of 2026-10-05; the Vunu migration is included on the same branch.

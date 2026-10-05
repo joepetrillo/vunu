@@ -47,7 +47,7 @@
       const { error } = await request();
       return error === null ? null : describeError(error);
     } catch {
-      return "Couldn't reach Unseen. Check your connection and try again.";
+      return "Couldn't reach Vunu. Check your connection and try again.";
     }
   }
 
@@ -111,10 +111,10 @@
   }
 </script>
 
-<svelte:head><title>Sign in · Unseen</title></svelte:head>
+<svelte:head><title>Sign in · Vunu</title></svelte:head>
 
 <main class="mx-auto max-w-sm p-4">
-  <h1 class="text-2xl font-bold">Sign in to Unseen</h1>
+  <h1 class="text-2xl font-bold">Sign in to Vunu</h1>
 
   {#if step === "email"}
     <!-- Before hydration, POST keeps sensitive fields out of URLs/logs. -->

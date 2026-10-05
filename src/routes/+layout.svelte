@@ -7,5 +7,12 @@
   let { children }: { children: Snippet } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+  <link rel="icon" href={favicon} />
+  <meta name="application-name" content="Vunu" />
+  <meta
+    name="description"
+    content="Find movies nobody in your group has seen."
+  />
+</svelte:head>
 {@render children()}

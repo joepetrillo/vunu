@@ -1,4 +1,4 @@
-# Unseen Movie Finder
+# Vunu Movie Finder
 
 SvelteKit app that finds movies nobody in a group has seen. Full spec, scope, and decision reasoning: `docs/PROJECT_SPEC.md`. Read it before planning any feature, and update it when a decision changes.
 

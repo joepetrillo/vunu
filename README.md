@@ -1,6 +1,8 @@
-# Unseen
+# Vunu
 
 Finds movies nobody in a group has seen. The current application has email-code sign-in, a movie catalog, and a personal seen list with search, filters, and pagination. Groups and watch sessions are later stages in the [product spec](docs/PROJECT_SPEC.md); stage 4 still needs its live-site check.
+
+Live domain: [www.vunu.app](https://www.vunu.app). `vunu.app` redirects there. Repository: [joepetrillo/vunu](https://github.com/joepetrillo/vunu).
 
 SvelteKit 3.0.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The [audit](docs/AUDIT.md) records exact resolved versions, source references, verification, and rollout notes. [AGENTS.md](AGENTS.md) holds contributor conventions.
 
@@ -19,7 +21,7 @@ bun run dev
 
 Vercel is the source of Development settings. Do not hand-edit `.env.local` or create competing env files. `drizzle.config.ts` deliberately loads `.env.local` before selecting `DATABASE_URL_UNPOOLED`. Its migration command **writes to that database**; an exported URL does not override this file. Do not pull Production settings for local work.
 
-The dev server uses `http://localhost:5173`; preview uses `http://localhost:4173`. Both ports are strict because Better Auth trusts explicit hosts. Local sign-in prints a code to the terminal when no Resend key is set.
+The dev server uses `http://localhost:5173`; preview uses `http://localhost:4173`. Both ports are strict because Better Auth trusts explicit hosts. Hosted sign-in trusts `vunu.app` and `www.vunu.app`; emails come from `Vunu <hello@vunu.app>` using the verified Resend domain. Local sign-in prints a code to the terminal when no Resend key is set.
 
 | Variable | Purpose |
 | --- | --- |
@@ -38,15 +40,15 @@ The dev server uses `http://localhost:5173`; preview uses `http://localhost:4173
 Tests refuse to fall back to `DATABASE_URL`. Select a disposable PostgreSQL 18 database explicitly. For example, start this container in a separate terminal (the published port is local only):
 
 ```sh
-docker run --rm --name unseen-test-db \
-  -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=unseen_test \
+docker run --rm --name vunu-test-db \
+  -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=vunu_test \
   -p 127.0.0.1:55432:5432 postgres:18
 ```
 
 Once it accepts connections, run from the repository root:
 
 ```sh
-export TEST_DATABASE_URL=postgres://test:test@127.0.0.1:55432/unseen_test
+export TEST_DATABASE_URL=postgres://test:test@127.0.0.1:55432/vunu_test
 bun run db:migrate:test
 bunx playwright install --with-deps chromium
 bun run verify
@@ -55,7 +57,7 @@ bun run test:e2e
 
 `db:migrate:test` uses only `TEST_DATABASE_URL` and the committed SQL migrations. It bypasses Development migration configuration. Fixtures create unique users/movies/genres and clean up their rows; auth rate-limit records follow the library's expiry pruning. Playwright builds and starts an isolated app with the test database, a fixture auth secret, and terminal delivery; it overrides inherited Resend settings. Provider tests mock Resend/TMDB. CI uses the same flow with a throwaway PostgreSQL 18 service.
 
-Stop/remove the example database with `docker stop unseen-test-db`. Never assign a live app database to `TEST_DATABASE_URL`.
+Stop/remove the example database with `docker stop vunu-test-db`. Never assign a live app database to `TEST_DATABASE_URL`.
 
 ## Feature navigation
 

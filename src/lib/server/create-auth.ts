@@ -37,6 +37,7 @@ export function createAuth({
 }) {
   return betterAuth({
     secret,
+    appName: "Vunu",
     // Better Auth 1.7.7 disables origin checks under NODE_ENV=test by default.
     // Keep the real protection enabled in every environment, including tests.
     advanced: { disableOriginCheck: false, disableCSRFCheck: false },
@@ -47,7 +48,8 @@ export function createAuth({
       allowedHosts: [
         "localhost:5173", // vite dev
         "localhost:4173", // vite preview (e2e tests)
-        "unseen-sooty-ten.vercel.app",
+        "vunu.app",
+        "www.vunu.app",
       ],
     },
     // `usePlural` maps Better Auth's models (user, session…) to our plural tables.

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Only used by a browser server connected to the explicitly selected test DB.
 export const TEST_AUTH_SECRET =
-  "unseen-disposable-test-secret-at-least-32-characters";
+  "vunu-disposable-test-secret-at-least-32-characters";
 
 /**
  * Selects a disposable database from the shell only. Never falls back to app

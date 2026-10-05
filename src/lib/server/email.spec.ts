@@ -66,10 +66,10 @@ describe("sign-in email delivery", () => {
 
     expect(send).toHaveBeenCalledTimes(2);
     expect(send).toHaveBeenCalledWith({
-      from: "Unseen <onboarding@resend.dev>",
+      from: "Vunu <hello@vunu.app>",
       to: "test@example.test",
-      subject: "123456 is your Unseen sign-in code",
-      text: "Your Unseen sign-in code is 123456. It expires in 5 minutes.\n\nIf you didn't try to sign in, you can ignore this email.",
+      subject: "123456 is your Vunu sign-in code",
+      text: "Your Vunu sign-in code is 123456. It expires in 5 minutes.\n\nIf you didn't try to sign in, you can ignore this email.",
     });
   });
 

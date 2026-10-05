@@ -29,17 +29,17 @@
       }
     } catch {
       errorMessage =
-        "Couldn't reach Unseen. Check your connection and try again.";
+        "Couldn't reach Vunu. Check your connection and try again.";
     } finally {
       signingOut = false;
     }
   }
 </script>
 
-<svelte:head><title>Unseen</title></svelte:head>
+<svelte:head><title>Vunu</title></svelte:head>
 
 <main class="mx-auto max-w-xl p-4">
-  <h1 class="text-2xl font-bold">Unseen</h1>
+  <h1 class="text-2xl font-bold">Vunu</h1>
   <p class="mt-2">Find movies nobody in your group has seen.</p>
   {#if data.user}
     <p class="mt-4 text-sm">

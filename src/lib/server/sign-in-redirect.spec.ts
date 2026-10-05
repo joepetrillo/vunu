@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { pathAfterSignIn, signInPath } from "./sign-in-redirect.ts";
 
-const ORIGIN = "https://unseen.test";
+const ORIGIN = "https://vunu.test";
 
 describe("signInPath", () => {
   it("remembers the requested page, including its query", () => {

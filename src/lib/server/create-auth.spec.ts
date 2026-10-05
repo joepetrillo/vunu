@@ -202,6 +202,27 @@ describe("email-code HTTP authentication", () => {
     expect(deliveries.has(email)).toBe(false);
   });
 
+  it.each(["vunu.app", "www.vunu.app"])(
+    "accepts a sign-in code request from https://%s",
+    async (host) => {
+      const origin = `https://${host}`;
+      const response = await auth.handler(
+        new Request(`${origin}/api/auth/email-otp/send-verification-otp`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": ip,
+            origin,
+            cookie: "better-auth.session_token=invalid",
+          },
+          body: JSON.stringify({ email, type: "sign-in" }),
+        })
+      );
+      expect(response.status).toBe(200);
+      expect(deliveries.get(email)).toBe(await readSignInCode(db, email));
+    }
+  );
+
   it("rejects an untrusted origin with a cookie and rejects unknown hosts", async () => {
     const rejected = await post(
       "/email-otp/send-verification-otp",
@@ -214,8 +235,14 @@ describe("email-code HTTP authentication", () => {
     expect(rejected.status).toBe(403);
     expect(deliveries.has(email)).toBe(false);
 
-    await expect(
-      auth.handler(new Request("https://evil.example/api/auth/get-session"))
-    ).rejects.toThrow(/allowed hosts list/);
+    for (const host of [
+      "evil.example",
+      "other-project.vercel.app",
+      "unseen-sooty-ten.vercel.app",
+    ]) {
+      await expect(
+        auth.handler(new Request(`https://${host}/api/auth/get-session`))
+      ).rejects.toThrow(/allowed hosts list/);
+    }
   });
 });

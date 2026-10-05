@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "unseen",
+      "name": "vunu",
       "dependencies": {
         "@better-auth/drizzle-adapter": "^1.7.7",
         "@vercel/functions": "^3.9.9",

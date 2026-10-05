@@ -15,7 +15,7 @@ const fixtures = createFixtures(db);
 
 const runId = `e2e-${crypto.randomUUID()}`;
 // A title only this run's movie has, so searching for the run ID finds it alone.
-const title = `Unseen test movie ${runId}`;
+const title = `Vunu test movie ${runId}`;
 const emails: string[] = [];
 
 test.beforeEach(async ({ page }) => {
@@ -136,7 +136,7 @@ test("validates action inputs and reports a missing catalog movie without a 500"
     headers: {
       origin: "http://localhost:4173",
       accept: "application/json",
-      "content-type": "multipart/form-data; boundary=unseen-audit",
+      "content-type": "multipart/form-data; boundary=vunu-audit",
       "x-sveltekit-action": "true",
     },
   });

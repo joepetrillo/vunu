@@ -1,9 +1,8 @@
 import { RESEND_API_KEY, VERCEL_ENV } from "$app/env/private";
 import { Resend } from "resend";
 
-// Resend's shared sender. Until we verify our own domain (needed before a
-// second person signs up), it only delivers to the Resend account owner.
-const FROM = "Unseen <onboarding@resend.dev>";
+// vunu.app is verified in Resend, so sign-in codes can reach group members.
+const FROM = "Vunu <hello@vunu.app>";
 
 // Created once per instance, like the database pool. Undefined locally, where
 // codes go to the terminal instead.
@@ -31,8 +30,8 @@ export async function sendSignInCode(to: string, code: string): Promise<void> {
   const { error } = await resend.emails.send({
     from: FROM,
     to,
-    subject: `${code} is your Unseen sign-in code`,
-    text: `Your Unseen sign-in code is ${code}. It expires in 5 minutes.\n\nIf you didn't try to sign in, you can ignore this email.`,
+    subject: `${code} is your Vunu sign-in code`,
+    text: `Your Vunu sign-in code is ${code}. It expires in 5 minutes.\n\nIf you didn't try to sign in, you can ignore this email.`,
   });
   if (error !== null) {
     // Better Auth logs this error. Provider messages can contain recipients;
