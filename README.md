@@ -4,7 +4,9 @@ Finds movies nobody in a group has seen. The current application has email-code 
 
 Live domain: [www.vunu.app](https://www.vunu.app). `vunu.app` redirects there. Repository: [joepetrillo/vunu](https://github.com/joepetrillo/vunu).
 
-SvelteKit 3.0.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The [audit](docs/AUDIT.md) records exact resolved versions, source references, verification, and rollout notes. [AGENTS.md](AGENTS.md) holds contributor conventions.
+SvelteKit 3.0.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
+
+The remaining release check is [hosted verification](docs/PROJECT_SPEC.md#current-state): real sign-in email delivery, sign-in/sign-out, and seen-list persistence on `www.vunu.app`. Domain verification and sender configuration are complete. The first encrypted-OTP deployment requires fresh sign-in codes; codes issued by the preceding plaintext deployment are incompatible.
 
 ## Development setup
 

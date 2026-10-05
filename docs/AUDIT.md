@@ -1,8 +1,8 @@
 # Application audit
 
-Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Branch: `audit/correctness-security-2026-10-02`, reviewed and prepared for merge on 2026-10-03 (see [Merge preparation](#merge-preparation-2026-10-03)); [PR #1](https://github.com/joepetrillo/vunu/pull/1) is still open as of 2026-10-05. This file is a historical record of the audit; current status lives in the spec's Progress list.
+Audit date: 2026-10-02. Baseline: `ed96a72caaddf79cca3505d5a9ddd78a191516a8`. Work tracked in [PR #1](https://github.com/joepetrillo/vunu/pull/1), with the October 3 review and stable-framework upgrade, then the October 5 Vunu rebrand and package updates. This file is a historical record of the audit; current status lives in the spec's [Current state](PROJECT_SPEC.md#current-state).
 
-The original version table and checks below describe the October 2 audit. The [stable-framework follow-up](#stable-framework-follow-up-2026-10-03) records the subsequently requested upgrade to SvelteKit 3.0.0 and Vercel adapter 7.0.0.
+The original version table and checks below describe the October 2 audit. The [stable-framework follow-up](#stable-framework-follow-up-2026-10-03) records the upgrade to SvelteKit 3.0.0 and Vercel adapter 7.0.0; the [Vunu/package follow-up](#vunu-and-package-follow-up-2026-10-05) records subsequent changes and CI results. Historical tables and checks retain the versions/counts used at the time; `bun.lock` records current resolved versions.
 
 ## Scope and architecture
 
@@ -35,7 +35,7 @@ The build reports missing **optional** modules: `pg-native`, `cloudflare:sockets
 
 ## Prioritized findings
 
-Severity describes consequence, not preferred style. Every correction below is implemented on the audit branch. Confirmed defects, hardening, and maintainability improvements are labeled separately; unresolved questions follow the table. Verification names refer to the colocated regression files.
+Severity describes consequence, not preferred style. Every correction below is implemented in the application. Confirmed defects, hardening, and maintainability improvements are labeled separately; unresolved questions follow the table. Verification names refer to the colocated regression files.
 
 | ID | Category; severity/confidence | Location and evidence | Consequence | Correction and verification |
 | --- | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ Resolved from the frozen `bun.lock` install and installed manifests, not package
 | `@types/node` / `@types/pg` | 24.19.0 / 8.23.1 |
 | Disposable database / browser | PostgreSQL 18.6 / Chromium 153 (Playwright build 1243) |
 
-`package.json` requires Node 24.x. The generated Vercel function config reports `nodejs24.x`, a Nodejs launcher, and adapter-controlled `experimentalResponseStreaming: true`. No Edge runtime is used. Vercel account settings/actual hosted runtime were not inspected.
+`package.json` requires Node 24.x. The generated Vercel function config reports `nodejs24.x`, a Nodejs launcher, and adapter-controlled `experimentalResponseStreaming: true`. No Edge runtime is used. Vercel account settings/actual hosted runtime were not inspected during the original audit. The later Vunu follow-up verifies project/domain configuration; hosted runtime behavior remains part of the release check.
 
 Kit configuration lives in `vite.config.ts`, as required by this Kit 3 prerelease. It forces runes for handwritten components and leaves dependencies' compiler mode alone. Remote functions, fork preloads, and experimental Svelte async are not enabled; no experimental application API was added. The DB driver is `drizzle-orm/node-postgres` over a shared TCP `pg` pool, not Neon HTTP/WebSocket.
 
@@ -125,15 +125,15 @@ Baseline checks above were already green; no pre-existing failing tests were hid
 
 Coverage is behavioral: real local PostgreSQL transactions/constraints and concurrent mutations, real auth HTTP handler/DB responses, Chromium components and full production-build browser journeys, and mocked external provider failures. Mock tests do not establish real Resend/TMDB delivery/availability. Neither a build nor these tests proves hosted end-to-end operation.
 
-## Remaining questions and separate rollout work
+## Release checks and deferred work
 
-1. **Encrypted OTP cutover:** no schema migration is needed, but pending plaintext OTPs from the prior code are incompatible with encrypted storage. Coordinate deployments sharing the verification table; do not run plaintext/encrypted auth versions concurrently. Allow the existing five-minute codes to expire during a quiet cutover and request fresh codes afterward. If overlapping deployments are required, design a separate compatible transition. Keep the existing auth secret to preserve sessions. No live verification rows were cleared or secrets rotated here.
-2. **Email/domain and Preview:** at audit time, `onboarding@resend.dev` only delivered to the Resend account owner. For the 2026-10-05 Vunu migration, Resend confirms `vunu.app` is verified; the migration changes this branch's sender to `Vunu <hello@vunu.app>`, with explicit trust for the new custom domains. Hosted delivery remains to be checked after merge. Configure an isolated Preview database/secret/email key and explicit Preview/custom host before using previews. The original audit did not change live settings or broaden trusted hosts. Confirm HTTPS cookies, proxy IP handling, hosted pool lifecycle/TLS, migration history, and email delivery in the separately authorized live-site check.
+1. **First encrypted-OTP deployment:** no schema migration is needed, but pending plaintext OTPs from the prior code are incompatible with encrypted storage. Coordinate deployments sharing the verification table; do not run plaintext/encrypted auth versions concurrently. Allow the existing five-minute codes to expire during a quiet cutover and request fresh codes afterward. If overlapping deployments are required, design a separate compatible transition. Keep the existing auth secret to preserve sessions. No live verification rows were cleared or secrets rotated here.
+2. **Hosted verification and Preview:** the original `onboarding@resend.dev` sender was owner-only. Domain verification is complete: Resend confirms `vunu.app` is verified, the application sends as `Vunu <hello@vunu.app>`, and auth explicitly trusts the new custom domains. Real hosted delivery and stage 4's sign-in/seen-list journey still need verification on the deployed site. Configure an isolated Preview database/secret/email key and explicit Preview/custom host before using previews. The original audit did not change live settings or broaden trusted hosts. Confirm HTTPS cookies, proxy IP handling, hosted pool lifecycle/TLS, migration history, and email delivery during the hosted release check described in the spec's [Current state](PROJECT_SPEC.md#current-state).
 3. **Unresolved RC driver edge (source confidence high; runtime consequence unverified):** Drizzle rc.4's node-postgres implementation executes `BEGIN` before its `try/finally` release block. If that initial statement rejects, the source does not explicitly release its borrowed client. Ordinary transaction rollback/concurrency are covered; initial-BEGIN transport failure and its pool-capacity consequence are not reproduced here. Do not claim the new pool timeout fixes this upstream edge. Verify/follow the tagged driver behavior and prefer a narrowly compatible upstream fix over monkey-patching the pool/ORM.
 4. **Retention:** Better Auth 1.7.7 prunes expired database rate-limit rows; the old spec claim that these never prune was inaccurate. App-specific `sign_in_code_limits` retains one address per requester, and action logs grow by design for retry/undo semantics. Decide retention/pruning alongside stage 9 jobs, without removing required action history. No live cleanup was run.
 5. **Product/runtime gaps:** signup stays open; no new allowlist, invite model, groups, watch sessions, jobs, or webhooks were invented. Bun remains unpinned in CI. Full catalog query performance, provider field compatibility for a new import, non-Chromium/screen-reader testing, and hosted Vercel/Neon/Resend behavior remain unverified. The schema/migration files were reviewed and applied locally, not compared to the deployed database. Stage 4's live-site check remains pending.
 
-No new schema migration, production data change, deployment, or real email is part of this audit. The original audit was local; the user subsequently authorized publishing only the audit branch for review. Perform the OTP/email/Preview preparation where applicable, then authorize the normal migration/build/deployment workflow separately. The test migration command is for disposable databases only.
+Audit/rebrand validation used disposable databases and mocked or terminal-only delivery; it performed no live database writes or real email sends. The audit and rebrand introduce no new schema migrations. Production uses the normal `main` migration/build/deployment workflow; hosted checks remain pending. Preview provisioning, the upstream driver edge, and retention/tooling work are deferred separately. The test migration command is for disposable databases only.
 
 ## Stable-framework follow-up (2026-10-03)
 
@@ -159,13 +159,21 @@ Finalization reran frozen installation, the four migrations on fresh disposable 
 
 Strict metavalidation of Vercel's entire published JSON schema failed on its unrelated queue-trigger definitions/draft declaration. Each of the three fields actually used (`$schema`, `git`, `buildCommand`) passed validation against its official property schema; exact branch-only disablement and the unchanged build command were also checked. No schema or application checks were weakened to hide a configuration error.
 
-## Merge preparation (2026-10-03)
+## Review follow-up (2026-10-03)
 
-A second review confirmed the findings and the stable upgrade against installed Better Auth 1.7.7 and SvelteKit 3.0.0 source. Before merging:
+A second review confirmed the findings and the stable upgrade against installed Better Auth 1.7.7 and SvelteKit 3.0.0 source. The review produced these implemented changes:
 
 - `vercel.json`'s branch-specific rule was replaced with `{"main": true, "**": false}`: only `main` deploys, so PR branches never run hosted migrations while Preview is unprovisioned. (`**`, not `*`, because `*` doesn't match branch names containing `/`.)
 - `docs/AUDIT_REVIEW_PROMPT.md` (a one-time handoff) was removed.
 - `testDatabaseUrl()` no longer falls back to `.env.local`; `TEST_DATABASE_URL` comes only from the shell.
 - `hooks.server.ts` notes that its `cache-control` header must be skipped for any future cacheable route, because Kit throws when a header is set twice.
 
-Merging deploys Production with no new migrations. Codes sent before the deploy were stored in plain text and won't verify afterward; request a new code. The remaining questions above (hosted email verification, Preview, Drizzle `BEGIN` edge, retention) carry forward as spec follow-ups. PR #1 is awaiting merge as of 2026-10-05; the Vunu migration is included on the same branch.
+Only `main` deploys Production, applying the existing migrations before building. The first encrypted-OTP deployment requires a fresh code afterward; preceding plaintext codes are incompatible. The hosted release check and deferred work are tracked in the spec's [Current state](PROJECT_SPEC.md#current-state).
+
+## Vunu and package follow-up (2026-10-05)
+
+The final product name is Vunu, at `www.vunu.app`; `vunu.app` and `vunu.vercel.app` redirect there. Vercel confirms all three domains are verified, and Resend confirms `vunu.app` is verified for sending. Application branding, metadata, favicon, package identity, email copy/sender (`Vunu <hello@vunu.app>`), auth app name, and explicit trust for both custom hosts are implemented. The local Vercel link retains the existing project/team IDs; the GitHub remote is `joepetrillo/vunu`. Database connections/schema and the auth secret are unchanged. New auth regression cases accept both custom hosts and reject the old host and unrelated Vercel projects.
+
+The subsequent `fcf7cb4` package update changes Vercel Functions to 3.9.11 (OIDC 4.0.0), Resend to 6.32.0, Vite to 8.3.2, Vitest/browser provider to 5.0.3, ESLint to 10.12.0, globals to 17.13.0, and Node types to 24.19.1. SvelteKit/adapter, Better Auth, and Drizzle versions remain unchanged. These later changes supersede the corresponding versions in the original audit table.
+
+Local rebrand validation passed frozen install, format/lint, type checks (zero errors/warnings), 56 unit/component tests, the production build, and whitespace checks. [CI after the package updates](https://github.com/joepetrillo/vunu/actions/runs/37263306400) passed frozen installation, format/lint, type checks, disposable PostgreSQL 18 migrations, 91 unit/component/database tests in 15 files, and all 15 Chromium journeys. Domain verification and automated checks are complete; real hosted email/sign-in and stage 4 verification remain pending. No real emails or live database writes were performed during this validation.
