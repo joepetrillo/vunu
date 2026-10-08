@@ -102,4 +102,4 @@ Svelte's `$state` and `$derived` update component state and computed values with
 
 Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 
-Every branch deploys: `main` to Production, others to Preview, each preview with its own Neon branch (`preview/<git-branch>`) that the build migrates. `src/lib/server/db/production-guard.ts` fails a Preview build or server that is pointed at Production's database. `.github/workflows/neon-preview-cleanup.yml` deletes a PR's preview database when the PR closes (it needs the `NEON_PROJECT_ID` variable and `NEON_API_KEY` secret).
+Every branch deploys: `main` to Production, others to Preview, each preview with its own Neon branch (`preview/<git-branch>`) that the build migrates. `src/lib/server/db/production-guard.ts` fails a Preview build or server that is pointed at Production's database. The Neon integration deletes a preview database after its Git branch is deleted (spec section 5b).
