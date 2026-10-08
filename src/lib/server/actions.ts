@@ -1,13 +1,32 @@
 import type { Db, Transaction } from "#lib/server/db/client.ts";
 import { type ActionType, actions } from "#lib/server/db/schema.ts";
 
-/** A change a user asked for, under the ID their browser generated for it. */
+/**
+ * A change a user asked for, under the ID their browser generated for it.
+ * Each type sets the inputs it has; the others stay unset (null in the log).
+ */
 export interface Action {
   id: string;
   userId: string;
   type: ActionType;
-  movieId: number;
+  movieId?: number;
+  groupId?: string;
+  memberId?: string;
+  groupName?: string;
+  nickname?: string;
 }
+
+type LoggedAction = typeof actions.$inferSelect;
+
+// Every input column. A retry must match all of them: the same ID with a
+// different nickname, say, is a different action.
+const inputs = [
+  "movieId",
+  "groupId",
+  "memberId",
+  "groupName",
+  "nickname",
+] as const satisfies readonly (keyof Action & keyof LoggedAction)[];
 
 /**
  * - `applied`: the change was made.
@@ -52,6 +71,10 @@ export async function runAction(
 
 // Includes the user: an ID taken from someone else's request is a conflict,
 // never a successful retry.
-function isSameAction(a: Action, b: Action): boolean {
-  return a.userId === b.userId && a.type === b.type && a.movieId === b.movieId;
+function isSameAction(logged: LoggedAction, action: Action): boolean {
+  return (
+    logged.userId === action.userId &&
+    logged.type === action.type &&
+    inputs.every((input) => logged[input] === (action[input] ?? null))
+  );
 }
