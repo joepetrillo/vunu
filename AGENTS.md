@@ -56,6 +56,7 @@ The Svelte MCP server (`svelte`) and the `svelte-code-writer` / `svelte-core-bes
 - Every server operation checks the permission it needs (answering requires an active participation; see spec section 4). The acting user comes from the auth session, never from request data.
 - Every application-domain mutation carries a client action ID and runs through `runAction` (`#lib/server/actions.ts`): logged in `actions` and applied in one transaction that bumps every affected counter (`watch_sessions.revision` and/or `users.seen_version`). Better Auth owns its separate authentication protocol. The browser keeps an ID until the server answers, so a retry resends it. ESLint rejects writes to `actions` outside `actions.ts`.
 - All seen-list changes go through one server module: `#lib/server/seen-list.ts` (ESLint rejects writes to `seenMovies` elsewhere; tests are exempt).
+- All group and membership changes go through `#lib/server/groups.ts` (ESLint rejects writes to `groups`, `groupMembers`, `inviteLookupLimits` elsewhere). Each change locks the group's row first (`SELECT … FOR UPDATE`), so membership changes to one group run one at a time. Non-members get `not_found`, the same as a missing group. In the browser, forms that send an action ID use `ActionForm` (`#lib/action-form.svelte.ts`).
 - Live updates go through `notifyWatchSessionChanged()` (server) and `subscribeToWatchSession()` (client). Polling compares a fingerprint of watch session revision + participants' seen versions; nothing else may poll or depend on the mechanism.
 
 ## Commands

@@ -39,7 +39,7 @@ export const LOOKUP_WINDOW_MINUTES = 10;
  * - `not_owner`: only the owner can do this.
  * - `nickname_taken`: someone in the group already uses it (ignoring case).
  * - `group_full`: the group has MAX_GROUP_MEMBERS members.
- * - `invite_invalid`: no group has this code (wrong, or reset).
+ * - `invite_invalid`: the code isn't this group's (wrong, or reset).
  * - `too_many_lookups`: over the invite lookup limit; try again later.
  * - `cannot_remove_self`: the owner leaves instead of removing themselves.
  */
@@ -125,52 +125,50 @@ export function createGroup(
 }
 
 /**
- * Joins the group whose invite code this is. Already a member: nothing
- * changes, and the outcome is still `applied` (you're in the group).
+ * Joins a group with its invite code. The join page sends the group's ID
+ * from its preview (previewInvite) along with the code, and the code must
+ * still belong to that group. Already a member: nothing changes, and the
+ * outcome is still `applied` (you're in the group).
  */
 export async function joinGroup(
   db: Db,
-  change: Change & { inviteCode: string; nickname: string }
+  change: GroupChange & { inviteCode: string; nickname: string }
 ): Promise<GroupOutcome> {
-  const { actionId, userId, inviteCode, nickname } = change;
+  const { actionId, userId, groupId, inviteCode, nickname } = change;
+  // Counted even with the group's ID in hand: a removed member knows it and
+  // could otherwise guess at the new code without limit.
   if (!(await consumeInviteLookup(db, userId))) return "too_many_lookups";
-
-  // Found outside the action, because the action records the group's ID.
-  // Rare edge: if the owner resets the code between a join that went through
-  // and its retry, the retry reports `invite_invalid` though you're in.
-  const group = await db.query.groups.findFirst({
-    columns: { id: true },
-    where: { inviteCode },
-  });
-  if (group === undefined) return "invite_invalid";
 
   const action: Action = {
     id: actionId,
     userId,
     type: "group_join",
-    groupId: group.id,
+    groupId,
     nickname,
   };
   return runGroupAction(db, action, async (tx) => {
-    const locked = await lockGroup(tx, group.id);
-    // Reset after the lookup above: the code this person has is dead.
-    if (locked.inviteCode !== inviteCode) throw new Refusal("invite_invalid");
-    if ((await findMembership(tx, group.id, userId)) !== undefined) return;
+    // A missing group and a wrong or reset code look the same to the joiner.
+    const [locked] = await tx
+      .select({ inviteCode: groups.inviteCode })
+      .from(groups)
+      .where(eq(groups.id, groupId))
+      .for("update");
+    if (locked?.inviteCode !== inviteCode) {
+      throw new Refusal("invite_invalid");
+    }
+    if ((await findMembership(tx, groupId, userId)) !== undefined) return;
 
     const [members] = await tx
       .select({ n: count() })
       .from(groupMembers)
-      .where(eq(groupMembers.groupId, group.id));
+      .where(eq(groupMembers.groupId, groupId));
     if ((members?.n ?? 0) >= MAX_GROUP_MEMBERS) {
       throw new Refusal("group_full");
     }
-    await requireFreeNickname(tx, group.id, nickname, userId);
-    await tx.insert(groupMembers).values({
-      groupId: group.id,
-      userId,
-      role: "member",
-      nickname,
-    });
+    await requireFreeNickname(tx, groupId, nickname, userId);
+    await tx
+      .insert(groupMembers)
+      .values({ groupId, userId, role: "member", nickname });
   });
 }
 
@@ -369,7 +367,7 @@ export async function getGroupForMember(
   });
   const me = group?.members.find((member) => member.userId === userId);
   if (group === undefined || me === undefined) return null;
-  return { ...group, myRole: me.role };
+  return { ...group, me };
 }
 
 /**
@@ -420,14 +418,13 @@ export async function lastNickname(db: Db, userId: string): Promise<string> {
  * Locks the group's row until the transaction ends. Every membership change
  * takes this lock first, so changes to one group queue instead of racing.
  */
-async function lockGroup(tx: Transaction, groupId: string) {
+async function lockGroup(tx: Transaction, groupId: string): Promise<void> {
   const [group] = await tx
-    .select({ id: groups.id, inviteCode: groups.inviteCode })
+    .select({ id: groups.id })
     .from(groups)
     .where(eq(groups.id, groupId))
     .for("update");
   if (group === undefined) throw new Refusal("not_found");
-  return group;
 }
 
 function findMembership(tx: Transaction, groupId: string, userId: string) {

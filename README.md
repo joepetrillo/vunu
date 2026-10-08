@@ -1,12 +1,12 @@
 # Vunu
 
-Finds movies nobody in a group has seen. The current application has email-code sign-in, a movie catalog, and a personal seen list with search, filters, and pagination. Groups and watch sessions are later stages in the [product spec](docs/PROJECT_SPEC.md); stage 4 still needs its live-site check.
+Finds movies nobody in a group has seen. The current application has email-code sign-in, a movie catalog, a personal seen list with search, filters, and pagination, and groups joined by invite link or code. Watch sessions are later stages in the [product spec](docs/PROJECT_SPEC.md).
 
 Live domain: [www.vunu.app](https://www.vunu.app). `vunu.app` redirects there. Repository: [joepetrillo/vunu](https://github.com/joepetrillo/vunu).
 
-SvelteKit 3.0.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
+SvelteKit 3.0.1 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
 
-The remaining release check is [hosted verification](docs/PROJECT_SPEC.md#current-state): real sign-in email delivery, sign-in/sign-out, and seen-list persistence on `www.vunu.app`. Domain verification and sender configuration are complete. The first encrypted-OTP deployment requires fresh sign-in codes; codes issued by the preceding plaintext deployment are incompatible.
+Stage 4's hosted check passed on 2026-10-08. Stage 5 (groups and invites) is built; see [Current state](docs/PROJECT_SPEC.md#current-state) for its live-site check.
 
 ## Development setup
 
@@ -70,7 +70,8 @@ Stop/remove the example database with `docker stop vunu-test-db`. Never assign a
 | OTP abuse limit and delivery | `src/lib/server/sign-in-code-limit.ts`, `email.ts`; sign-in UI in `src/routes/sign-in/` |
 | Seen-list UI and validation | `src/routes/seen/+page.svelte`, `+page.server.ts`, `SeenButton.svelte` |
 | Catalog/seen-list reads | `src/lib/server/movie-search.ts` |
-| Atomic, idempotent writes | `src/lib/server/actions.ts`, `seen-list.ts` |
+| Groups, members, invites | `src/lib/server/groups.ts` (only write path), `group-forms.ts`; pages in `src/routes/groups/`, `src/routes/join/`; field rules in `src/lib/group-fields.ts` |
+| Atomic, idempotent writes | `src/lib/server/actions.ts`, `seen-list.ts`, `groups.ts`; browser action IDs in `src/lib/action-form.svelte.ts` |
 | Database schema, relations, pool/TLS | `src/lib/server/db/`; migrations in `drizzle/` |
 | Development catalog import | `scripts/seed-movies.ts`, `src/lib/server/tmdb/` |
 | Test fixtures and isolated configuration | `src/lib/server/testing/`; colocated `*.spec.ts` and `*.e2e.ts` |
@@ -96,7 +97,7 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | `bun run outdated:next` | Checks remaining pinned prereleases (Drizzle ORM/Kit) without upgrading them |
 | `vercel env ls` | Lists variable names per Vercel environment, without values (read-only) |
 
-`bun install` sets up a pre-commit hook ([simple-git-hooks](https://github.com/toplenboren/simple-git-hooks), configured in `package.json`) that runs `bun run lint`. Skip it once with `git commit --no-verify`. ESLint also enforces two write paths: only `seen-list.ts` writes `seenMovies`, and only `actions.ts` writes `actions` (tests are exempt).
+`bun install` sets up a pre-commit hook ([simple-git-hooks](https://github.com/toplenboren/simple-git-hooks), configured in `package.json`) that runs `bun run lint`. Skip it once with `git commit --no-verify`. ESLint also enforces three write paths: only `seen-list.ts` writes `seenMovies`, only `groups.ts` writes `groups`/`groupMembers`/`inviteLookupLimits`, and only `actions.ts` writes `actions` (tests are exempt).
 
 Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 

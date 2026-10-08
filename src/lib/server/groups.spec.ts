@@ -54,8 +54,18 @@ async function newGroup(ownerId: string, name = "Movie night") {
   return group;
 }
 
-function join(userId: string, inviteCode: string, nickname: string) {
-  return joinGroup(db, { actionId: id(), userId, inviteCode, nickname });
+function join(
+  userId: string,
+  group: { id: string; inviteCode: string },
+  nickname: string
+) {
+  return joinGroup(db, {
+    actionId: id(),
+    userId,
+    groupId: group.id,
+    inviteCode: group.inviteCode,
+    nickname,
+  });
 }
 
 async function members(groupId: string) {
@@ -125,7 +135,7 @@ describe("joining with an invite code", () => {
 
   it("adds the person as a member", async () => {
     const friend = await fixtures.user();
-    expect(await join(friend, group.inviteCode, "Sam")).toBe("applied");
+    expect(await join(friend, group, "Sam")).toBe("applied");
     expect(await members(group.id)).toEqual([
       { userId: owner, role: "owner", nickname: "Owner" },
       { userId: friend, role: "member", nickname: "Sam" },
@@ -134,7 +144,7 @@ describe("joining with an invite code", () => {
   });
 
   it("changes nothing for someone already in the group", async () => {
-    expect(await join(owner, group.inviteCode, "Someone else")).toBe("applied");
+    expect(await join(owner, group, "Someone else")).toBe("applied");
     expect(await members(group.id)).toEqual([
       { userId: owner, role: "owner", nickname: "Owner" },
     ]);
@@ -145,6 +155,7 @@ describe("joining with an invite code", () => {
     const change = {
       actionId: id(),
       userId: friend,
+      groupId: group.id,
       inviteCode: group.inviteCode,
       nickname: "OWNER",
     };
@@ -155,7 +166,13 @@ describe("joining with an invite code", () => {
 
   it("refuses a wrong code and an old code after a reset", async () => {
     const friend = await fixtures.user();
-    expect(await join(friend, "ZZZZZZ", "Sam")).toBe("invite_invalid");
+    expect(await join(friend, { ...group, inviteCode: "ZZZZZZ" }, "Sam")).toBe(
+      "invite_invalid"
+    );
+    // The right code with a different group's ID is no better.
+    expect(await join(friend, { ...group, id: id() }, "Sam")).toBe(
+      "invite_invalid"
+    );
 
     const reset = await resetInvite(db, {
       actionId: id(),
@@ -163,11 +180,25 @@ describe("joining with an invite code", () => {
       groupId: group.id,
     });
     expect(reset).toBe("applied");
-    expect(await join(friend, group.inviteCode, "Sam")).toBe("invite_invalid");
+    expect(await join(friend, group, "Sam")).toBe("invite_invalid");
 
     const fresh = await db.query.groups.findFirst({ where: { id: group.id } });
-    expect(fresh?.inviteCode).not.toBe(group.inviteCode);
-    expect(await join(friend, fresh?.inviteCode ?? "", "Sam")).toBe("applied");
+    if (fresh === undefined) throw new Error("group disappeared");
+    expect(fresh.inviteCode).not.toBe(group.inviteCode);
+    expect(await join(friend, fresh, "Sam")).toBe("applied");
+  });
+
+  it("recognizes a retried join even after the code was reset", async () => {
+    const change = {
+      actionId: id(),
+      userId: await fixtures.user(),
+      groupId: group.id,
+      inviteCode: group.inviteCode,
+      nickname: "Sam",
+    };
+    expect(await joinGroup(db, change)).toBe("applied");
+    await resetInvite(db, { actionId: id(), userId: owner, groupId: group.id });
+    expect(await joinGroup(db, change)).toBe("duplicate");
   });
 
   it("lets exactly one of two simultaneous joins take the last place", async () => {
@@ -186,8 +217,8 @@ describe("joining with an invite code", () => {
 
     const [a, b] = [await fixtures.user(), await fixtures.user()];
     const outcomes = await Promise.all([
-      join(a, group.inviteCode, "A"),
-      join(b, group.inviteCode, "B"),
+      join(a, group, "A"),
+      join(b, group, "B"),
     ]);
 
     expect(outcomes.sort()).toEqual(["applied", "group_full"]);
@@ -208,7 +239,7 @@ describe("invite lookup limit", () => {
     // Even the right code is refused now, and joining counts too.
     const preview = await previewInvite(db, guesser, group.inviteCode);
     expect(preview.status).toBe("too_many_lookups");
-    expect(await join(guesser, group.inviteCode, "G")).toBe("too_many_lookups");
+    expect(await join(guesser, group, "G")).toBe("too_many_lookups");
   });
 
   it("shows the group to someone holding its code", async () => {
@@ -233,8 +264,8 @@ describe("leaving", () => {
     const owner = await fixtures.user();
     const group = await newGroup(owner);
     const [first, second] = [await fixtures.user(), await fixtures.user()];
-    await join(first, group.inviteCode, "First");
-    await join(second, group.inviteCode, "Second");
+    await join(first, group, "First");
+    await join(second, group, "Second");
 
     const change = { actionId: id(), userId: owner, groupId: group.id };
     expect(await leaveGroup(db, change)).toBe("applied");
@@ -267,7 +298,7 @@ describe("owner actions", () => {
     owner = await fixtures.user();
     member = await fixtures.user();
     group = await newGroup(owner, "Before");
-    await join(member, group.inviteCode, "Member");
+    await join(member, group, "Member");
   });
 
   it("lets the owner rename, remove, and delete", async () => {
@@ -282,7 +313,7 @@ describe("owner actions", () => {
     ).toBe("applied");
     expect(await getGroupForMember(db, group.id, member)).toBeNull();
     // A removed member can come back with the invite.
-    expect(await join(member, group.inviteCode, "Member")).toBe("applied");
+    expect(await join(member, group, "Member")).toBe("applied");
 
     const deletion = { ...base, actionId: id() };
     expect(await deleteGroup(db, deletion)).toBe("applied");
@@ -325,7 +356,7 @@ describe("nicknames", () => {
     const owner = await fixtures.user();
     const group = await newGroup(owner);
     const friend = await fixtures.user();
-    await join(friend, group.inviteCode, "sam");
+    await join(friend, group, "sam");
     const base = { userId: friend, groupId: group.id };
 
     expect(
@@ -388,7 +419,7 @@ describe("listing groups", () => {
     const owner = await fixtures.user();
     const friend = await fixtures.user();
     const group = await newGroup(owner, "Listed");
-    await join(friend, group.inviteCode, "Friend");
+    await join(friend, group, "Friend");
 
     expect(await listGroups(db, friend)).toEqual([
       { id: group.id, name: "Listed", role: "member", memberCount: 2 },

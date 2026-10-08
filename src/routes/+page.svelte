@@ -59,4 +59,51 @@
   <p class="mt-4 text-sm">
     <a class="underline" href={resolve("seen")}>Your seen movies</a>
   </p>
+
+  <section class="mt-8" aria-labelledby="groups-heading">
+    <div class="flex items-baseline justify-between gap-4">
+      <h2 id="groups-heading" class="text-lg font-semibold">Your groups</h2>
+      <a class="text-sm underline" href={resolve("/groups/new")}>New group</a>
+    </div>
+    {#if data.groups.length === 0}
+      <p class="mt-2 text-sm text-neutral-600">
+        You're not in a group yet. Start one, or join with an invite.
+      </p>
+    {:else}
+      <ul class="mt-2 divide-y rounded border">
+        {#each data.groups as group (group.id)}
+          <li>
+            <a
+              class="flex items-baseline justify-between gap-4 p-3 hover:bg-neutral-50"
+              href={resolve("/groups/[groupId]", { groupId: group.id })}
+            >
+              <span class="min-w-0 font-medium break-words">{group.name}</span>
+              <span class="shrink-0 text-sm text-neutral-600">
+                {group.memberCount === 1
+                  ? "1 person"
+                  : `${String(group.memberCount)} people`}
+                {#if group.role === "owner"}· Owner{/if}
+              </span>
+            </a>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+
+    <!-- A plain GET form: /join checks the code and sends you on. -->
+    <form class="mt-4 flex items-end gap-2" action={resolve("/join")}>
+      <label class="flex flex-col text-sm">
+        Join with a code
+        <input
+          class="mt-1 w-36 rounded border px-2 py-1.5 font-mono uppercase"
+          name="code"
+          required
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+        />
+      </label>
+      <button class="rounded border px-3 py-1.5 text-sm">Join</button>
+    </form>
+  </section>
 </main>
