@@ -223,6 +223,31 @@ describe("email-code HTTP authentication", () => {
     }
   );
 
+  it("trusts a Preview deployment's own hosts and no other", async () => {
+    const preview = "vunu-git-stage-5-groups-joes-projects-dab9d62e.vercel.app";
+    const previewAuth = createAuth({
+      db,
+      secret: TEST_AUTH_SECRET,
+      sendCode: () => Promise.resolve(),
+      previewHosts: [preview],
+    });
+    const session = await previewAuth.handler(
+      new Request(`https://${preview}/api/auth/get-session`)
+    );
+    expect(session.status).toBe(200);
+    await expect(
+      previewAuth.handler(
+        new Request(
+          "https://vunu-git-other-joes-projects-dab9d62e.vercel.app/api/auth/get-session"
+        )
+      )
+    ).rejects.toThrow(/allowed hosts list/);
+    // The default (Production, local) never trusts a preview host.
+    await expect(
+      auth.handler(new Request(`https://${preview}/api/auth/get-session`))
+    ).rejects.toThrow(/allowed hosts list/);
+  });
+
   it("rejects an untrusted origin with a cookie and rejects unknown hosts", async () => {
     const rejected = await post(
       "/email-otp/send-verification-otp",

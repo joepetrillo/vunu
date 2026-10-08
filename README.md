@@ -33,9 +33,10 @@ The dev server uses `http://localhost:5173`; preview uses `http://localhost:4173
 | `RESEND_API_KEY` | Required on hosted Preview and Production; optional locally |
 | `TMDB_READ_ACCESS_TOKEN` | Development-only TMDB token, used by `db:seed`, never by user requests |
 | `VERCEL_ENV` | Vercel-provided `development`, `preview`, or `production`; normally unset outside Vercel |
+| `VERCEL_URL`, `VERCEL_BRANCH_URL` | Vercel-provided hostnames of a deployment; auth trusts them on Preview only |
 | `TEST_DATABASE_URL` | Explicitly selected **disposable** PostgreSQL database; required for database and browser tests |
 
-[.env.example](.env.example) lists names without credentials. Preview is not provisioned yet: it needs its own database, auth secret, email key, and an explicitly trusted host before sign-in will work. Never trust `*.vercel.app`.
+[.env.example](.env.example) lists names without credentials. Preview deployments get a per-branch Neon database from the integration, their own auth secret, and the Resend key; auth trusts each preview's exact hostnames (`VERCEL_URL`, `VERCEL_BRANCH_URL`). Never trust `*.vercel.app`.
 
 ## Safe test setup
 
@@ -101,4 +102,4 @@ Svelte's `$state` and `$derived` update component state and computed values with
 
 Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 
-Only `main` deploys: `vercel.json` disables Vercel Git deployments for every other branch (`"**": false`), so PR branches get CI but never a hosted build or migration. Revisit when Preview is provisioned.
+Every branch deploys: `main` to Production, others to Preview, each preview with its own Neon branch (`preview/<git-branch>`) that the build migrates. `src/lib/server/db/production-guard.ts` fails a Preview build or server that is pointed at Production's database. `.github/workflows/neon-preview-cleanup.yml` deletes a PR's preview database when the PR closes (it needs the `NEON_PROJECT_ID` variable and `NEON_API_KEY` secret).
