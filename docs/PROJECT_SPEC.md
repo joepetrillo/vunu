@@ -303,6 +303,7 @@ Entries below are dated implementation history. The current status and outstandi
   - Deleting a user account (not a feature yet) cascades their memberships without promoting a new owner; handle that when account deletion is built.
   - `invite_lookup_limits` needs retention with the stage 9 jobs, like `sign_in_code_limits`.
   - Preview deployments enabled for reviewing this stage before merge (section 5b): per-branch Neon databases, Preview secret, reused Resend key, exact preview hosts trusted, a guard against Production's database, and PR-close cleanup.
+  - iOS Safari focused the "Join with a code" field (opening the keyboard) on every home page load, which desktop browsers don't do and SvelteKit doesn't cause (it only focuses `[autofocus]` or the body). `JoinCodeForm` drops focus that arrives before any tap or key press on the page.
   - iOS Safari allows one share sheet at a time: a second `navigator.share()` before the first fully closes throws, and the promise can stay pending. The invite card copies the link instead whenever a sheet is open or sharing fails (found in the preview check, 2026-10-09).
   - Kit 3 gotcha: `SubmitFunction` is exported from `$app/forms` (or a route's `./$types`), not `@sveltejs/kit`.
   - TypeScript's DOM types declare `navigator.share` on every browser; desktop Firefox lacks it, so the invite card checks for it at runtime.
