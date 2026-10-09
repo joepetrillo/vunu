@@ -98,6 +98,8 @@ test("a second account joins by link, a third by code", async ({ browser }) => {
   await third
     .getByLabel("Join with a code")
     .fill(`${code.slice(0, 3).toLowerCase()} ${code.slice(3)}`);
+  // Lowercase and the space are cleaned up as it's typed.
+  await expect(third.getByLabel("Join with a code")).toHaveValue(code);
   await third.getByRole("button", { name: "Join", exact: true }).click();
   await expect(third).toHaveURL(`/join/${code}`);
   // The nickname field remembers nothing yet for a new account.
@@ -170,11 +172,23 @@ test("leaving hands ownership on; the owner can reset the invite", async ({
   await friend.getByRole("button", { name: "Reset invite" }).click();
   await expect(friend.getByLabel("Invite code")).not.toHaveText(code);
 
-  // The old code is dead.
+  // The old code is dead: a link shows the same message as a wrong code,
+  // with the code form to try another.
   await owner.goto(`/join/${code}`);
-  await expect(
-    owner.getByRole("heading", { name: "Can't use this invite" })
-  ).toBeVisible();
+  await expect(owner.getByRole("alert")).toHaveText(
+    "That's not an active invite code."
+  );
+
+  // Typed on the home page, it stays there with the same message.
+  await owner.goto("/");
+  const input = owner.getByLabel("Join with a code");
+  await input.fill(code);
+  await owner.getByRole("button", { name: "Join", exact: true }).click();
+  await expect(owner.getByRole("alert")).toHaveText(
+    "That's not an active invite code."
+  );
+  await expect(owner).toHaveURL("/");
+  await expect(input).toHaveValue(code);
 });
 
 test("an invite link survives signing in first", async ({ browser }) => {

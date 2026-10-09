@@ -3,17 +3,19 @@
   import { resolve } from "$app/paths";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
+  import JoinCodeForm from "#lib/components/JoinCodeForm.svelte";
   import { NICKNAME_MAX } from "#lib/group-fields.ts";
 
   import type { PageProps } from "./$types";
 
-  let { data }: PageProps = $props();
+  let { data, form }: PageProps = $props();
 
   const join = new ActionForm();
 </script>
 
 <svelte:head>
-  <title>{data.found ? `Join ${data.group.name}` : "Invite"} · Vunu</title>
+  <title>{data.found ? `Join ${data.group.name}` : "Join a group"} · Vunu</title
+  >
 </svelte:head>
 
 <main class="mx-auto max-w-xl p-4">
@@ -22,7 +24,7 @@
     <h1 class="mt-2 text-2xl font-bold break-words">
       Join {data.group.name}?
     </h1>
-    <form class="mt-4" method="POST" use:enhance={join.submit}>
+    <form class="mt-4" method="POST" action="?/join" use:enhance={join.submit}>
       <input type="hidden" name="groupId" value={data.group.id} />
       <label class="flex flex-col text-sm">
         What should this group call you?
@@ -49,10 +51,9 @@
       {/if}
     </form>
   {:else}
-    <h1 class="mt-2 text-2xl font-bold">Can't use this invite</h1>
-    <p class="mt-2" role="alert">{data.message}</p>
-    <p class="mt-4 text-sm">
-      <a class="underline" href={resolve("/join")}>Enter a code</a>
-    </p>
+    <!-- A wrong or reset code gets the same form as the home page, with
+         the same message, so the person can try another code. -->
+    <h1 class="mt-2 text-2xl font-bold">Join a group</h1>
+    <JoinCodeForm error={form?.codeError ?? data.message} />
   {/if}
 </main>

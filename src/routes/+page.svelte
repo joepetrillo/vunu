@@ -3,10 +3,11 @@
   import { resolve } from "$app/paths";
 
   import { authClient } from "#lib/auth-client.ts";
+  import JoinCodeForm from "#lib/components/JoinCodeForm.svelte";
 
   import type { PageProps } from "./$types";
 
-  let { data }: PageProps = $props();
+  let { data, form }: PageProps = $props();
   let signingOut = $state(false);
   let errorMessage = $state<string | null>(null);
 
@@ -90,20 +91,6 @@
       </ul>
     {/if}
 
-    <!-- A plain GET form: /join checks the code and sends you on. -->
-    <form class="mt-4 flex items-end gap-2" action={resolve("/join")}>
-      <label class="flex flex-col text-sm">
-        Join with a code
-        <input
-          class="mt-1 w-36 rounded border px-2 py-1.5 font-mono uppercase"
-          name="code"
-          required
-          autocomplete="off"
-          autocapitalize="characters"
-          spellcheck="false"
-        />
-      </label>
-      <button class="rounded border px-3 py-1.5 text-sm">Join</button>
-    </form>
+    <JoinCodeForm error={form?.codeError} />
   </section>
 </main>

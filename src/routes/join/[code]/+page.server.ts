@@ -3,7 +3,12 @@ import { z } from "zod";
 
 import { inviteCodeSchema, nicknameSchema } from "#lib/group-fields.ts";
 import { db } from "#lib/server/db/index.ts";
-import { readForm, refusal, refusalMessage } from "#lib/server/group-forms.ts";
+import {
+  findInvite,
+  readForm,
+  refusal,
+  refusalMessage,
+} from "#lib/server/group-forms.ts";
 import { joinGroup, lastNickname, previewInvite } from "#lib/server/groups.ts";
 import { requireUser } from "#lib/server/require-user.ts";
 
@@ -38,7 +43,9 @@ const joinSchema = z.object({
 });
 
 export const actions = {
-  default: async ({ request, locals, params }) => {
+  // A dead link shows the code form, so the person can try another code.
+  find: findInvite,
+  join: async ({ request, locals, params }) => {
     const user = requireUser(locals);
     const code = inviteCodeSchema.safeParse(params.code);
     if (!code.success) {
