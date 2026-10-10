@@ -15,6 +15,16 @@ export const relations = defineRelations(schema, (r) => ({
   genres: {
     movies: r.many.movies(),
   },
+  groups: {
+    members: r.many.groupMembers(),
+  },
+  groupMembers: {
+    group: r.one.groups({
+      from: r.groupMembers.groupId,
+      to: r.groups.id,
+      optional: false,
+    }),
+  },
   // Better Auth's relations (from its generator). Its adapter uses them for
   // joins; we rarely query them directly.
   users: {

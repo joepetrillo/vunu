@@ -1,7 +1,11 @@
-import { DATABASE_URL } from "$app/env/private";
+import { DATABASE_URL, VERCEL_ENV } from "$app/env/private";
 import { attachDatabasePool } from "@vercel/functions";
 
 import { createDb } from "./client.ts";
+import { assertPreviewIsolated } from "./production-guard.ts";
+
+// The build's migration step checks this too; this also covers the requests.
+assertPreviewIsolated(VERCEL_ENV, DATABASE_URL);
 
 // Runs once per instance: Node caches modules, so every request on a warm
 // Fluid compute instance shares this pool. Two connections is plenty because

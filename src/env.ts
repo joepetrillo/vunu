@@ -36,4 +36,14 @@ export const variables = defineEnvVars({
       "Set by Vercel (production, preview, development). Unset outside Vercel.",
     schema: z.enum(["production", "preview", "development"]).optional(),
   },
+  VERCEL_URL: {
+    description:
+      "Set by Vercel: this deployment's own hostname (no https://). Trusted by auth on Preview only.",
+    schema: z.hostname().optional(),
+  },
+  VERCEL_BRANCH_URL: {
+    description:
+      "Set by Vercel: the hostname that follows a Git branch's latest deployment. Trusted by auth on Preview only.",
+    schema: z.hostname().optional(),
+  },
 });

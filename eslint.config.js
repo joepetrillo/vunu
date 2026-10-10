@@ -62,6 +62,7 @@ export default defineConfig(
     ignores: [
       "src/lib/server/seen-list.ts",
       "src/lib/server/actions.ts",
+      "src/lib/server/groups.ts",
       "src/**/*.spec.ts",
       "src/**/*.e2e.ts",
       "src/lib/server/testing/**",
@@ -74,6 +75,12 @@ export default defineConfig(
             "CallExpression[callee.property.name=/^(insert|update|delete)$/][arguments.0.name='seenMovies']",
           message:
             "Change seen lists only through #lib/server/seen-list.ts (it bumps users.seen_version).",
+        },
+        {
+          selector:
+            "CallExpression[callee.property.name=/^(insert|update|delete)$/][arguments.0.name=/^(groups|groupMembers|inviteLookupLimits)$/]",
+          message:
+            "Change groups only through #lib/server/groups.ts (it locks the group and logs the action).",
         },
         {
           selector:

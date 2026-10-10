@@ -4,6 +4,7 @@ import { parseEnv } from "node:util";
 import { defineConfig } from "drizzle-kit";
 import { z } from "zod";
 
+import { assertPreviewIsolated } from "./src/lib/server/db/production-guard.ts";
 import { withVerifiedTls } from "./src/lib/server/db/url.ts";
 
 // drizzle-kit runs under Node and only auto-loads `.env`. Vite and Bun let
@@ -21,6 +22,8 @@ const unpooledUrl = z
     error: "DATABASE_URL_UNPOOLED is not set. Run `vercel env pull`.",
   })
   .parse(process.env.DATABASE_URL_UNPOOLED);
+// Vercel runs `db:migrate` before every build, Preview builds included.
+assertPreviewIsolated(process.env.VERCEL_ENV, unpooledUrl);
 
 export default defineConfig({
   schema: "./src/lib/server/db/schema.ts",

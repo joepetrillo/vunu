@@ -30,10 +30,13 @@ export function createAuth({
   db,
   secret,
   sendCode,
+  previewHosts = [],
 }: {
   db: Db;
   secret: string;
   sendCode: (email: string, code: string) => Promise<void>;
+  /** A Preview deployment's own hostnames (see auth.ts); none elsewhere. */
+  previewHosts?: readonly string[];
 }) {
   return betterAuth({
     secret,
@@ -50,6 +53,7 @@ export function createAuth({
         "localhost:4173", // vite preview (e2e tests)
         "vunu.app",
         "www.vunu.app",
+        ...previewHosts,
       ],
     },
     // `usePlural` maps Better Auth's models (user, session…) to our plural tables.
