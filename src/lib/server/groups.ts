@@ -135,9 +135,19 @@ export async function joinGroup(
   change: GroupChange & { inviteCode: string; nickname: string }
 ): Promise<GroupOutcome> {
   const { actionId, userId, groupId, inviteCode, nickname } = change;
+  // A retry of a join that already went through (its response was lost)
+  // must reach runAction to be recognized, even at the lookup limit. An ID
+  // in the log is never a new guess: runAction answers it without looking
+  // at the code.
+  const logged = await db.query.actions.findFirst({
+    columns: { id: true },
+    where: { id: actionId },
+  });
   // Counted even with the group's ID in hand: a removed member knows it and
   // could otherwise guess at the new code without limit.
-  if (!(await consumeInviteLookup(db, userId))) return "too_many_lookups";
+  if (logged === undefined && !(await consumeInviteLookup(db, userId))) {
+    return "too_many_lookups";
+  }
 
   const action: Action = {
     id: actionId,

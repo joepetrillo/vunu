@@ -242,6 +242,27 @@ describe("invite lookup limit", () => {
     expect(await join(guesser, group, "G")).toBe("too_many_lookups");
   });
 
+  it("recognizes a retried join even at the lookup limit", async () => {
+    const owner = await fixtures.user();
+    const group = await newGroup(owner);
+    const friend = await fixtures.user();
+    const change = {
+      actionId: id(),
+      userId: friend,
+      groupId: group.id,
+      inviteCode: group.inviteCode,
+      nickname: "Sam",
+    };
+    expect(await joinGroup(db, change)).toBe("applied");
+    // Use up the rest of the window, as if the response was lost meanwhile.
+    for (let i = 1; i < MAX_INVITE_LOOKUPS; i++) {
+      await previewInvite(db, friend, "ZZZZZZ");
+    }
+    expect(await joinGroup(db, change)).toBe("duplicate");
+    // A new attempt is still refused.
+    expect(await join(friend, group, "Other")).toBe("too_many_lookups");
+  });
+
   it("shows the group to someone holding its code", async () => {
     const owner = await fixtures.user();
     const group = await newGroup(owner, "Friday films");
