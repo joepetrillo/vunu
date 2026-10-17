@@ -6,7 +6,7 @@ Live domain: [vunu.app](https://vunu.app). `www.vunu.app` redirects there. Repos
 
 SvelteKit 3.0.1 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
 
-Stages 1–8 are done; stage 8 (the group deck) replaced watch sessions. Status: [Current state](docs/PROJECT_SPEC.md#current-state).
+Stages 1–8 of 10 are done; stage 8 (the group deck) replaced watch sessions. Next is stage 9, the full catalog sync (the live catalog is still a 300-movie seed), then stage 10, launch. Status and what's left: [Current state](docs/PROJECT_SPEC.md#current-state).
 
 ## Development setup
 
@@ -74,7 +74,7 @@ Stop/remove the example database with `docker stop vunu-test-db`. Never assign a
 | Groups, members, invites | `src/lib/server/groups.ts` (only write path), `group-forms.ts`; pages in `src/routes/groups/`, `src/routes/join/` (`/join` takes a typed code; `/join/[code]` is an invite link); field rules in `src/lib/group-fields.ts` |
 | Group deck: answers, undo, matches, We watched this | `src/lib/server/group-deck.ts` (only write path), `deck-forms.ts`; deck in `src/routes/groups/[groupId]/find/` (save queue in `deck.svelte.ts`, poll, preferences); the group page is a hub (`+layout.server.ts` checks membership once) with matches, watched, members, and settings screens under it; preference rules in `src/lib/deck-fields.ts`; polling in `src/lib/deck-updates.ts` |
 | Atomic, idempotent writes | `src/lib/server/actions.ts`, `seen-list.ts`, `groups.ts`, `group-deck.ts`; browser action IDs in `src/lib/action-form.svelte.ts` |
-| UI components and layout | `src/lib/components/ui/` (shadcn-svelte, Maia style; ours to edit), `Page.svelte`, `ListGroup.svelte`, `NavRow.svelte`, `CodeInput.svelte`; error page in `src/routes/+error.svelte`; colors in `src/routes/layout.css`; Light/Dark/System in `src/lib/theme.svelte.ts` with its first-paint script in `src/app.html` |
+| UI components and layout | `src/lib/components/ui/` (shadcn-svelte, Maia style; ours to edit), `Page.svelte`, `ListGroup.svelte`, `NavRow.svelte`, `CodeInput.svelte`, `ConfirmDialog.svelte`; text built from data in `src/lib/format.ts`; error page in `src/routes/+error.svelte`; colors in `src/routes/layout.css`; Light/Dark/System in `src/lib/theme.svelte.ts` with its first-paint script in `src/app.html` |
 | Database schema, relations, pool/TLS | `src/lib/server/db/`; migrations in `drizzle/` |
 | Development catalog import | `scripts/seed-movies.ts`, `src/lib/server/tmdb/` |
 | Test fixtures and isolated configuration | `src/lib/server/testing/`; colocated `*.spec.ts` and `*.e2e.ts` |
@@ -100,7 +100,7 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | `bun run outdated:next` | Checks remaining pinned prereleases (Drizzle ORM/Kit) without upgrading them |
 | `vercel env ls` | Lists variable names per Vercel environment, without values (read-only) |
 
-`bun install` sets up a pre-commit hook ([simple-git-hooks](https://github.com/toplenboren/simple-git-hooks), configured in `package.json`) that runs `bun run lint`. Skip it once with `git commit --no-verify`. ESLint also enforces four write paths: only `seen-list.ts` writes `seenMovies`, only `groups.ts` writes `groups`/`groupMembers`/`inviteLookupLimits`, only `group-deck.ts` writes `notSeenMovies`/`groupWatchedMovies`, and only `actions.ts` writes `actions` (tests are exempt). Nothing may write the retired watch-session tables.
+`bun install` sets up a pre-commit hook ([simple-git-hooks](https://github.com/toplenboren/simple-git-hooks), configured in `package.json`) that runs `bun run lint`. Skip it once with `git commit --no-verify`. ESLint also enforces four write paths: only `seen-list.ts` writes `seenMovies`, only `groups.ts` writes `groups`/`groupMembers`/`inviteLookupLimits`, only `group-deck.ts` writes `notSeenMovies`/`groupWatchedMovies`, and only `actions.ts` writes `actions` (tests are exempt).
 
 Vercel's configured build runs `db:migrate` before `build`, so a deployment writes to its selected database. New migrations must remain compatible with the preceding deployment.
 
