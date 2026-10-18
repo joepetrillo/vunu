@@ -13,11 +13,12 @@ const MAX_RETRY_DELAY_MS = 30_000;
 
 // Only sync scripts use this. The app never calls TMDB during a user session.
 export function createTmdbClient(readAccessToken: string) {
-  async function get<T extends z.ZodType>(
+  /** Fetches and validates one resource; null when TMDB has no such resource. */
+  async function find<T extends z.ZodType>(
     path: string,
     params: Record<string, string>,
     schema: T
-  ): Promise<z.infer<T>> {
+  ): Promise<z.infer<T> | null> {
     const url = `${BASE_URL}${path}?${new URLSearchParams(params).toString()}`;
     for (let attempt = 1; ; attempt++) {
       const response = await fetch(url, {
@@ -31,6 +32,7 @@ export function createTmdbClient(readAccessToken: string) {
 
       // Release the response body/connection before waiting or failing.
       await response.body?.cancel();
+      if (response.status === 404) return null;
 
       // 429 = rate limited, 5xx = TMDB hiccup: both are worth retrying.
       const retryable = response.status === 429 || response.status >= 500;
@@ -55,34 +57,66 @@ export function createTmdbClient(readAccessToken: string) {
     }
   }
 
+  /** Like `find`, for resources that always exist. */
+  async function get<T extends z.ZodType>(
+    path: string,
+    params: Record<string, string>,
+    schema: T
+  ): Promise<z.infer<T>> {
+    const result = await find(path, params, schema);
+    if (result === null) throw new Error(`TMDB ${path} returned 404`);
+    return result;
+  }
+
   return {
     genres: () =>
       get("/genre/movie/list", { language: "en-US" }, genreListSchema),
 
-    // Most-voted first: our deck ordering proxy for "well-known".
-    discoverByVoteCount: (page: number) =>
+    /**
+     * One page of movies with at least `minVotes` votes whose primary release
+     * date falls in [from, to] (inclusive "YYYY-MM-DD"). TMDB serves at most
+     * 500 pages per query, so callers split ranges until each fits.
+     */
+    discover: (query: DiscoverQuery) =>
       get(
         "/discover/movie",
         {
-          sort_by: "vote_count.desc",
+          // A sort on values that rarely change, so pages stay stable while
+          // we read them (a vote-count sort shifts as people vote).
+          sort_by: "original_title.asc",
+          "vote_count.gte": String(query.minVotes),
+          "primary_release_date.gte": query.from,
+          "primary_release_date.lte": query.to,
           include_adult: "false",
           include_video: "false",
           language: "en-US",
-          page: String(page),
+          page: String(query.page),
         },
         discoverPageSchema
       ),
 
-    // Discover results lack runtime, IMDb ID, and US release info; this adds them.
+    /**
+     * Runtime, IMDb ID, genres, and US release info, which discover results
+     * lack. Null when TMDB no longer has the movie.
+     */
     movieDetails: async (id: number) => {
-      const details = await get(
+      const details = await find(
         `/movie/${String(id)}`,
         { language: "en-US", append_to_response: "release_dates" },
         movieDetailsSchema
       );
-      if (details.id !== id)
+      if (details !== null && details.id !== id)
         throw new Error("TMDB returned a different movie than requested.");
       return details;
     },
   };
 }
+
+export interface DiscoverQuery {
+  minVotes: number;
+  from: string;
+  to: string;
+  page: number;
+}
+
+export type TmdbClient = ReturnType<typeof createTmdbClient>;

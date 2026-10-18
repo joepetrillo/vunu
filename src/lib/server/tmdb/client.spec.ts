@@ -99,4 +99,37 @@ describe("TMDB HTTP client", () => {
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("returns null for a movie TMDB doesn't have, without retrying", async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 404 }));
+    expect(await tmdb.movieDetails(1)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // Lists always exist, so a 404 there is an error.
+    await expect(tmdb.genres()).rejects.toThrow(
+      "TMDB /genre/movie/list returned 404"
+    );
+  });
+
+  it("asks discover for one date range above a vote count", async () => {
+    fetchMock.mockResolvedValue(
+      Response.json({ page: 2, total_pages: 3, total_results: 41, results: [] })
+    );
+    await tmdb.discover({
+      minVotes: 50,
+      from: "1994-01-01",
+      to: "1994-12-31",
+      page: 2,
+    });
+    const requested = fetchMock.mock.calls[0]?.[0];
+    if (typeof requested !== "string") throw new Error("Expected a URL string");
+    const url = new URL(requested);
+    expect(url.pathname).toBe("/3/discover/movie");
+    expect(Object.fromEntries(url.searchParams)).toMatchObject({
+      "vote_count.gte": "50",
+      "primary_release_date.gte": "1994-01-01",
+      "primary_release_date.lte": "1994-12-31",
+      include_adult: "false",
+      page: "2",
+    });
+  });
 });

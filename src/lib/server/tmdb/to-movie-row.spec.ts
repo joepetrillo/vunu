@@ -64,6 +64,7 @@ describe("toMovieRow", () => {
       posterPath: "/poster.jpg",
       imdbId: "tt1375666",
       syncedAt,
+      detailsSyncedAt: syncedAt,
     });
     expect(genreIds).toEqual([28, 878]);
   });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assertCatalogSyncTarget,
   assertPreviewIsolated,
   isProductionDatabase,
   PRODUCTION_ENDPOINT_ID,
@@ -44,5 +45,36 @@ describe("assertPreviewIsolated", () => {
     expect(() => {
       assertPreviewIsolated("preview", url("ep-other-pooler.aws.neon.tech"));
     }).not.toThrow();
+  });
+});
+
+describe("assertCatalogSyncTarget", () => {
+  const direct = url(`${PRODUCTION_ENDPOINT_ID}.c-14.us-east-1.aws.neon.tech`);
+  const development = url(
+    "ep-quiet-lake-a1b2c3d4.c-14.us-east-1.aws.neon.tech"
+  );
+
+  it("writes to Production only from GitHub Actions", () => {
+    expect(() => {
+      assertCatalogSyncTarget(direct, undefined);
+    }).toThrow(/only writes to Production from its GitHub Actions/);
+    expect(() => {
+      assertCatalogSyncTarget(direct, "false");
+    }).toThrow(/GitHub Actions/);
+    expect(() => {
+      assertCatalogSyncTarget(direct, "true");
+    }).not.toThrow();
+    expect(() => {
+      assertCatalogSyncTarget(development, undefined);
+    }).not.toThrow();
+  });
+
+  it.each([
+    `${PRODUCTION_ENDPOINT_ID}-pooler.c-14.us-east-1.aws.neon.tech`,
+    "ep-quiet-lake-a1b2c3d4-pooler.c-14.us-east-1.aws.neon.tech",
+  ])("refuses the pooler (%s), which can't hold the run's lock", (host) => {
+    expect(() => {
+      assertCatalogSyncTarget(url(host), "true");
+    }).toThrow(/direct \(unpooled\)/);
   });
 });

@@ -32,3 +32,27 @@ export function assertPreviewIsolated(
     );
   }
 }
+
+/**
+ * Where the catalog sync (scripts/sync-catalog.ts) may write. Production only
+ * from GitHub Actions, so nothing on a laptop changes Production by mistake
+ * (spec section 5b); locally it fills the Development database. It needs
+ * the direct connection: the run holds a session lock, which Neon's pooler
+ * can't keep.
+ */
+export function assertCatalogSyncTarget(
+  connectionString: string,
+  githubActions: string | undefined
+): void {
+  const label = new URL(connectionString).hostname.split(".")[0] ?? "";
+  if (label.endsWith("-pooler")) {
+    throw new Error(
+      "The catalog sync needs the direct (unpooled) database URL, not the pooler."
+    );
+  }
+  if (isProductionDatabase(connectionString) && githubActions !== "true") {
+    throw new Error(
+      "The catalog sync only writes to Production from its GitHub Actions workflow."
+    );
+  }
+}

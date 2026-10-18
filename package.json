@@ -21,10 +21,10 @@
     "test:e2e": "playwright install chromium && playwright test",
     "verify": "bun install --frozen-lockfile && bun run lint && bun run check && bun run test:unit --run",
     "outdated:next": "bun scripts/outdated-next.ts",
+    "catalog:sync": "bun scripts/sync-catalog.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:test": "bun scripts/migrate-test-db.ts",
-    "db:seed": "bun scripts/seed-movies.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
