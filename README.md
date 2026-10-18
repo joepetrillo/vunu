@@ -4,9 +4,9 @@ Finds movies nobody in a group has seen. The current application has email-code 
 
 Live domain: [vunu.app](https://vunu.app). `www.vunu.app` redirects there. Repository: [joepetrillo/vunu](https://github.com/joepetrillo/vunu).
 
-SvelteKit 3.0.1 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.0. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
+SvelteKit 3.1.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.1. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
 
-Stages 1–8 of 10 are done; stage 8 (the group deck) replaced watch sessions. Next is stage 9, the full catalog sync (the live catalog is still a 300-movie seed), then stage 10, launch. Status and what's left: [Current state](docs/PROJECT_SPEC.md#current-state).
+Stages 1–8 of 10 are done; stage 8 (the group deck) replaced watch sessions. Stage 9, the full catalog sync, is built: a GitHub Actions workflow runs `bun run catalog:sync` against Production every 2 days, and its first run loads the full catalog (until then the live catalog is a 300-movie seed). Then stage 10, launch. Status and what's left: [Current state](docs/PROJECT_SPEC.md#current-state).
 
 ## Development setup
 
@@ -18,6 +18,7 @@ vercel link
 vercel env pull # Development values -> .env.local
 # Check the selected Development database before applying migrations.
 bun run db:migrate
+bun run catalog:sync # optional: the full TMDB catalog into Development (resumable)
 bun run dev
 ```
 
@@ -31,7 +32,7 @@ The dev server uses `http://localhost:5173`; preview uses `http://localhost:4173
 | `DATABASE_URL_UNPOOLED` | Development/deploy migrations' direct PostgreSQL URL |
 | `BETTER_AUTH_SECRET` | At least 32 characters; signs sessions and encrypts OTPs; distinct per environment |
 | `RESEND_API_KEY` | Required on hosted Preview and Production; optional locally |
-| `TMDB_READ_ACCESS_TOKEN` | Development-only TMDB token, used by `db:seed`, never by user requests |
+| `TMDB_READ_ACCESS_TOKEN` | TMDB token for `catalog:sync`, never used by user requests: Development-only on Vercel; Production's sync reads a GitHub repository secret |
 | `VERCEL_ENV` | Vercel-provided `development`, `preview`, or `production`; normally unset outside Vercel |
 | `VERCEL_URL`, `VERCEL_BRANCH_URL` | Vercel-provided hostnames of a deployment; auth trusts them on Preview only |
 | `TEST_DATABASE_URL` | Explicitly selected **disposable** PostgreSQL database; required for database and browser tests |
@@ -76,7 +77,7 @@ Stop/remove the example database with `docker stop vunu-test-db`. Never assign a
 | Atomic, idempotent writes | `src/lib/server/actions.ts`, `seen-list.ts`, `groups.ts`, `group-deck.ts`; browser action IDs in `src/lib/action-form.svelte.ts` |
 | UI components and layout | `src/lib/components/ui/` (shadcn-svelte, Maia style; ours to edit), `Page.svelte`, `ListGroup.svelte`, `NavRow.svelte`, `CodeInput.svelte`, `ConfirmDialog.svelte`; text built from data in `src/lib/format.ts`; error page in `src/routes/+error.svelte`; colors in `src/routes/layout.css`; Light/Dark/System in `src/lib/theme.svelte.ts` with its first-paint script in `src/app.html` |
 | Database schema, relations, pool/TLS | `src/lib/server/db/`; migrations in `drizzle/` |
-| Development catalog import | `scripts/seed-movies.ts`, `src/lib/server/tmdb/` |
+| Catalog sync (TMDB → `movies`) | `scripts/sync-catalog.ts`, `src/lib/server/tmdb/` (`sync-catalog.ts`); workflow `.github/workflows/catalog-sync.yml`; design in spec section 2 |
 | Test fixtures and isolated configuration | `src/lib/server/testing/`; colocated `*.spec.ts` and `*.e2e.ts` |
 | Build/runtime/environment | `vite.config.ts`, `src/env.ts`, `vercel.json`, `.github/workflows/ci.yml` |
 
@@ -94,7 +95,7 @@ Svelte's `$state` and `$derived` update component state and computed values with
 | `bun run db:migrate:test` | Applies migrations only to the explicitly selected disposable test DB |
 | `bun run db:generate` | Generates new SQL migrations from schema changes; review and commit them |
 | `bun run db:migrate` | Applies migrations to `.env.local`'s Development database, or deploy-provided settings |
-| `bun run db:seed` | Calls TMDB and writes/upserts the small Development catalog; requires its token; rejects hosted Preview/Production |
+| `bun run catalog:sync` | Loads or refreshes the full catalog from TMDB into `DATABASE_URL_UNPOOLED` (locally: Development); resumes an interrupted run; refuses Production outside GitHub Actions and the pooled URL |
 | `bun run db:studio` | Opens a database editor for the configured database |
 | `bun outdated` | Checks stable package updates without upgrading them |
 | `bun run outdated:next` | Checks remaining pinned prereleases (Drizzle ORM/Kit) without upgrading them |

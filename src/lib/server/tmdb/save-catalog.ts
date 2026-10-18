@@ -3,7 +3,11 @@ import { inArray, sql } from "drizzle-orm";
 import type { Db } from "#lib/server/db/client.ts";
 import { genres, movieGenres, movies } from "#lib/server/db/schema.ts";
 
-import type { TmdbGenre, TmdbMovieDetails } from "./schemas.ts";
+import type {
+  TmdbDiscoveredMovie,
+  TmdbGenre,
+  TmdbMovieDetails,
+} from "./schemas.ts";
 import { toMovieRow } from "./to-movie-row.ts";
 
 /** Persists one validated provider batch atomically; safe to re-run. */
@@ -52,6 +56,7 @@ export async function saveCatalog(
           posterPath: sql.raw(`excluded.${movies.posterPath.name}`),
           imdbId: sql.raw(`excluded.${movies.imdbId.name}`),
           syncedAt: sql.raw(`excluded.${movies.syncedAt.name}`),
+          detailsSyncedAt: sql.raw(`excluded.${movies.detailsSyncedAt.name}`),
         },
       })
       // PostgreSQL returns xmax=0 for this statement's inserts, so seeding can
@@ -74,4 +79,41 @@ export async function saveCatalog(
 
   const inserted = upserted.filter((row) => row.inserted).length;
   return { inserted, updated: upserted.length - inserted };
+}
+
+/**
+ * Saves what a discover pass learned, in one transaction: new movies are
+ * inserted without details (never dealt until their details arrive), and
+ * known ones get fresh vote counts and ratings. Returns how many were new.
+ */
+export async function saveDiscovered(
+  db: Db,
+  batch: { movies: TmdbDiscoveredMovie[]; syncedAt: Date }
+): Promise<{ inserted: number }> {
+  if (batch.movies.length === 0) return { inserted: 0 };
+  const rows = batch.movies.map((movie) => ({
+    id: movie.id,
+    title: movie.title,
+    releaseDate: movie.release_date === "" ? null : movie.release_date,
+    voteCount: movie.vote_count,
+    // Same rule as toMovieRow: no votes means no rating, not a rating of 0.
+    voteAverage: movie.vote_count > 0 ? movie.vote_average : null,
+    syncedAt: batch.syncedAt,
+    detailsSyncedAt: null,
+  }));
+  const result = await db
+    .insert(movies)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: movies.id,
+      // Only votes: details own every other field, so a half-updated movie
+      // never mixes two sources.
+      set: {
+        voteAverage: sql.raw(`excluded.${movies.voteAverage.name}`),
+        voteCount: sql.raw(`excluded.${movies.voteCount.name}`),
+        syncedAt: sql.raw(`excluded.${movies.syncedAt.name}`),
+      },
+    })
+    .returning({ inserted: sql<boolean>`xmax = 0` });
+  return { inserted: result.filter((row) => row.inserted).length };
 }

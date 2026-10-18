@@ -48,6 +48,7 @@ export function toMovieRow(
       posterPath: details.poster_path,
       imdbId: details.imdb_id === "" ? null : details.imdb_id,
       syncedAt,
+      detailsSyncedAt: syncedAt,
     },
     // Junction rows are unique per movie/genre even if the provider repeats one.
     genreIds: [...new Set(details.genres.map((g) => g.id))],

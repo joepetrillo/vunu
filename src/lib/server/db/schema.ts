@@ -35,7 +35,13 @@ export const movies = pgTable(
     voteCount: integer("vote_count").notNull(),
     posterPath: text("poster_path"),
     imdbId: text("imdb_id"),
+    // Last time TMDB told us anything about this movie (votes come from every
+    // sync's discovery pass).
     syncedAt: timestamp("synced_at", { withTimezone: true }).notNull(),
+    // Last time its details (runtime, US release, certification, genres...)
+    // were fetched. Null: discovered but not detailed yet. With no US release
+    // date such a movie is never dealt, and the next sync fetches it first.
+    detailsSyncedAt: timestamp("details_synced_at", { withTimezone: true }),
   },
   // The deck keeps movies above a vote-count floor and ranks by vote count;
   // with the full catalog (stage 9) this saves scanning every movie.

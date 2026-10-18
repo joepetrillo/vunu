@@ -12,10 +12,23 @@ export const genreListSchema = z.object({
   genres: z.array(genreSchema),
 });
 
+// Shared by discover results and details, which describe the same movie.
+const movieFields = {
+  id: z.int32().positive(),
+  title: z.string().trim().min(1),
+  // TMDB uses "" (not null) when a date is unknown.
+  release_date: z.union([z.literal(""), z.iso.date()]),
+  vote_average: z.number().min(0).max(10),
+  vote_count: z.int32().nonnegative(),
+};
+
+// One page of /discover/movie. Each result carries the vote count and rating,
+// so a pass over every page refreshes votes without per-movie requests.
 export const discoverPageSchema = z.object({
   page: z.int32().min(1).max(500),
   total_pages: z.int32().nonnegative(),
-  results: z.array(z.object({ id: z.int32().positive() })),
+  total_results: z.int32().nonnegative(),
+  results: z.array(z.object(movieFields)),
 });
 
 const releaseDateSchema = z.object({
@@ -27,15 +40,10 @@ const releaseDateSchema = z.object({
 });
 
 export const movieDetailsSchema = z.object({
-  id: z.int32().positive(),
-  title: z.string().trim().min(1),
-  // TMDB uses "" (not null) when a date is unknown.
-  release_date: z.union([z.literal(""), z.iso.date()]),
+  ...movieFields,
   // TMDB uses 0 or null when the runtime is unknown.
   runtime: z.int32().nonnegative().nullable(),
   genres: z.array(genreSchema),
-  vote_average: z.number().min(0).max(10),
-  vote_count: z.int32().nonnegative(),
   // TMDB returns one filename beginning with '/', not a URL or srcset list.
   poster_path: z
     .string()
@@ -55,3 +63,6 @@ export const movieDetailsSchema = z.object({
 
 export type TmdbGenre = z.infer<typeof genreSchema>;
 export type TmdbMovieDetails = z.infer<typeof movieDetailsSchema>;
+export type TmdbDiscoveredMovie = z.infer<
+  typeof discoverPageSchema
+>["results"][number];
