@@ -10,9 +10,28 @@ const BASE_URL = "https://api.themoviedb.org/3";
 const MAX_ATTEMPTS = 4;
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_RETRY_DELAY_MS = 30_000;
+// TMDB's limit is "somewhere in the 40s" per second per IP. A full sync
+// sends tens of thousands of requests, so stay under it instead of leaning
+// on 429 retries, which give up after MAX_ATTEMPTS.
+const REQUESTS_PER_SECOND = 35;
 
 // Only sync scripts use this. The app never calls TMDB during a user session.
-export function createTmdbClient(readAccessToken: string) {
+export function createTmdbClient(
+  readAccessToken: string,
+  { requestsPerSecond = REQUESTS_PER_SECOND } = {}
+) {
+  // Requests start at least this far apart, however many are in flight.
+  const spacingMs = 1000 / requestsPerSecond;
+  let nextStart = 0;
+  async function waitForTurn(): Promise<void> {
+    if (spacingMs === 0) return;
+    const now = Date.now();
+    const start = Math.max(now, nextStart);
+    nextStart = start + spacingMs;
+    if (start > now)
+      await new Promise((resolve) => setTimeout(resolve, start - now));
+  }
+
   /** Fetches and validates one resource; null when TMDB has no such resource. */
   async function find<T extends z.ZodType>(
     path: string,
@@ -21,6 +40,7 @@ export function createTmdbClient(readAccessToken: string) {
   ): Promise<z.infer<T> | null> {
     const url = `${BASE_URL}${path}?${new URLSearchParams(params).toString()}`;
     for (let attempt = 1; ; attempt++) {
+      await waitForTurn();
       const response = await fetch(url, {
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         headers: {

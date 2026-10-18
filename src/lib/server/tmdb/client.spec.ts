@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTmdbClient } from "./client.ts";
 
 const fetchMock = vi.fn<typeof fetch>();
-const tmdb = createTmdbClient("mock-token-never-sent");
+// No spacing between requests here; the rate limit has its own test.
+const tmdb = createTmdbClient("mock-token-never-sent", {
+  requestsPerSecond: Infinity,
+});
 const genres = { genres: [{ id: 28, name: "Action" }] };
 
 beforeEach(() => {
@@ -131,5 +134,25 @@ describe("TMDB HTTP client", () => {
       include_adult: "false",
       page: "2",
     });
+  });
+
+  it("spaces requests out to stay under TMDB's rate limit", async () => {
+    vi.setSystemTime(new Date("2026-10-18T00:00:00Z"));
+    fetchMock.mockImplementation(() => Promise.resolve(Response.json(genres)));
+    const limited = createTmdbClient("mock-token-never-sent", {
+      requestsPerSecond: 10,
+    });
+    const pending = Promise.all([
+      limited.genres(),
+      limited.genres(),
+      limited.genres(),
+    ]);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await pending;
   });
 });

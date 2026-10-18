@@ -22,12 +22,13 @@ const REFRESH_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 
 // TMDB serves at most 500 pages (20 movies each) per discover query.
 const MAX_PAGES = 500;
+const PAGE_SIZE = 20;
 // TMDB's earliest films are from the 1870s; a little future covers announced
 // movies that already have votes (the deck skips unreleased ones).
 const FIRST_DAY = "1870-01-01";
 const FUTURE_YEARS = 2;
-// Parallel TMDB requests; TMDB allows roughly 50 per second, and the client
-// waits and retries when it's told to slow down.
+// Requests in flight. The client spaces their starts to stay under TMDB's
+// rate limit; this only hides each request's latency.
 const CONCURRENCY = 8;
 // Details saved per transaction: an interruption loses at most one batch,
 // and live requests never wait on a long lock.
@@ -185,7 +186,12 @@ async function splitRanges(
 ): Promise<Range[]> {
   const query = { minVotes: CATALOG_MIN_VOTES, from, to, page: 1 };
   const page = await tmdb.discover(query);
-  if (page.total_pages <= MAX_PAGES)
+  // Checks the result count too, in case TMDB ever caps the page count it
+  // reports at the pages it will serve.
+  if (
+    page.total_pages <= MAX_PAGES &&
+    page.total_results <= MAX_PAGES * PAGE_SIZE
+  )
     return [
       { query, pages: Math.max(page.total_pages, 1), firstPage: page.results },
     ];
