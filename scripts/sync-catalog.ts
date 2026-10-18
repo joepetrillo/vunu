@@ -37,8 +37,9 @@ const env = z
 
 assertCatalogSyncTarget(env.DATABASE_URL_UNPOOLED, env.GITHUB_ACTIONS);
 
-// One connection holds the run's lock; two do the work.
-const { pool, db } = createDb(env.DATABASE_URL_UNPOOLED, 3);
+// Two connections, the project's pool limit: one holds the run's lock, the
+// other does the work (the sync's writes run one at a time).
+const { pool, db } = createDb(env.DATABASE_URL_UNPOOLED, 2);
 const tmdb = createTmdbClient(env.TMDB_READ_ACCESS_TOKEN);
 const log = (line: string) => {
   console.log(`[${new Date().toISOString().slice(11, 19)}] ${line}`);
