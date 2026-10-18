@@ -119,17 +119,26 @@ async function addMember(groupId: string, memberId: string, nickname: string) {
     .values({ groupId, userId: memberId, role: "member", nickname });
 }
 
-/** From the group page: Find a movie, in the mood for one genre. */
+/**
+ * From the group page: Find a movie, which asks what you're in the mood for
+ * first, then one genre.
+ */
 async function findMovie(page: Page, genre: TestGenre): Promise<void> {
   await page.getByRole("link", { name: "Find a movie" }).click();
-  await expect(page.getByText("In the mood for: Anything")).toBeVisible();
-  await page.getByRole("link", { name: "Change" }).click();
+  await expect(
+    page.getByRole("heading", { name: "In the mood for" })
+  ).toBeVisible();
   await page.getByText(genre.name, { exact: true }).click();
   await page.getByRole("button", { name: "Show movies" }).click();
   await expect(page).toHaveURL(
     new RegExp(`/find\\?.*genreIds=${String(genre.id)}`)
   );
-  await expect(page.getByText(`In the mood for:`)).toContainText(genre.name);
+  await expect(moodBar(page)).toContainText(genre.name);
+}
+
+/** The deck's "In the mood for" bar, which opens the preferences. */
+function moodBar(page: Page) {
+  return page.getByRole("button", { name: /^In the mood for/ });
 }
 
 function card(page: Page) {
@@ -302,6 +311,28 @@ test("a save that loses its response is retried once, not twice", async ({
     .innerJoin(users, eq(users.id, actions.userId))
     .where(and(eq(users.email, email), eq(actions.type, "answer_not_seen")));
   expect(logged).toHaveLength(1);
+});
+
+test("changes preferences from the deck's mood bar", async ({ page }) => {
+  const email = `${runId}-${String(emails.length)}@example.test`;
+  emails.push(email);
+  await signIn(page, db, email);
+  await createGroup(page, "Me");
+  await findMovie(page, comedy);
+  await expect(card(page)).toHaveText(title(comedy, 0));
+
+  // The sheet starts with tonight's picks; swap comedy for horror.
+  await moodBar(page).click();
+  const sheet = page.getByRole("dialog", { name: "In the mood for" });
+  await sheet.getByText(comedy.name, { exact: true }).click();
+  await sheet.getByText(horror.name, { exact: true }).click();
+  await sheet.getByText("Not animated", { exact: true }).click();
+  await sheet.getByRole("button", { name: "Show movies" }).click();
+
+  await expect(sheet).toBeHidden();
+  await expect(page).toHaveURL(/animation=exclude/);
+  await expect(moodBar(page)).toContainText(`${horror.name} · Not animated`);
+  await expect(card(page)).toHaveText(title(horror, 0));
 });
 
 test("doesn't poll while an answer is being saved", async ({ page }) => {

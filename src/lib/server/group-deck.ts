@@ -25,12 +25,14 @@ import { alias } from "drizzle-orm/pg-core";
 import { DatabaseError } from "pg";
 
 import {
+  ANIMATION_GENRE_ID,
   type DeckState,
   describePreferences,
   hasPreferences,
   type MovieCard,
   type PollReply,
   type Preferences,
+  type Rating,
 } from "#lib/deck-fields.ts";
 import {
   type Action,
@@ -596,6 +598,17 @@ export async function describeDeckPreferences(
   );
 }
 
+/** The genres people can pick, by name. Animation has a field of its own. */
+export async function listPreferenceGenres(
+  db: Db | Transaction
+): Promise<{ id: number; name: string }[]> {
+  return db
+    .select({ id: genres.id, name: genres.name })
+    .from(genres)
+    .where(ne(genres.id, ANIMATION_GENRE_ID))
+    .orderBy(asc(genres.name));
+}
+
 /** Whether you have an answer from this group's deck left to undo. */
 export async function canUndo(
   db: Db | Transaction,
@@ -782,7 +795,13 @@ function fitsPreferences(
   preferences: Preferences
 ): SQL | undefined {
   if (!hasPreferences(preferences)) return undefined;
-  const { maxRuntime, minYear, maxYear, genreIds } = preferences;
+  const { maxRuntime, minYear, maxYear, genreIds, animation, ratings } =
+    preferences;
+  const withGenres = (ids: number[]) =>
+    db
+      .select({ id: movieGenres.movieId })
+      .from(movieGenres)
+      .where(inArray(movieGenres.genreId, ids));
   return and(
     maxRuntime === null ? undefined : lte(movies.runtime, maxRuntime),
     minYear === null
@@ -793,13 +812,40 @@ function fitsPreferences(
       : lt(movies.releaseDate, `${String(maxYear + 1)}-01-01`),
     genreIds.length === 0
       ? undefined
-      : inArray(
-          movies.id,
-          db
-            .select({ id: movieGenres.movieId })
-            .from(movieGenres)
-            .where(inArray(movieGenres.genreId, genreIds))
+      : inArray(movies.id, withGenres(genreIds)),
+    animation === "any"
+      ? undefined
+      : animation === "only"
+        ? inArray(movies.id, withGenres([ANIMATION_GENRE_ID]))
+        : notInArray(movies.id, withGenres([ANIMATION_GENRE_ID])),
+    ratings.length === 0 ? undefined : hasRating(ratings)
+  );
+}
+
+// TMDB's US certifications for each rating people can pick. NR ("Not rated")
+// is everything else: TMDB's own NR, a missing rating, or anything unusual.
+const CERTIFICATIONS: Record<Exclude<Rating, "NR">, string[]> = {
+  G: ["G"],
+  PG: ["PG"],
+  "PG-13": ["PG-13"],
+  R: ["R", "NC-17"],
+};
+const RATED = Object.values(CERTIFICATIONS).flat();
+
+function hasRating(ratings: Rating[]): SQL | undefined {
+  const certifications = ratings.flatMap((rating) =>
+    rating === "NR" ? [] : CERTIFICATIONS[rating]
+  );
+  return or(
+    certifications.length === 0
+      ? undefined
+      : inArray(movies.usCertification, certifications),
+    ratings.includes("NR")
+      ? or(
+          isNull(movies.usCertification),
+          notInArray(movies.usCertification, RATED)
         )
+      : undefined
   );
 }
 
