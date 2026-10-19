@@ -152,47 +152,19 @@ export function hasPreferences(preferences: Preferences): boolean {
 }
 
 /**
- * "Comedy, Drama · Not animated · PG-13, R · Up to 2 h · 1990–2009", or
- * "Anything" for none.
+ * How many kinds of preference are set (genres count once), for the deck's
+ * "In the mood for" button. 0 means anything.
  */
-export function describePreferences(
-  preferences: Preferences,
-  genreNames: ReadonlyMap<number, string>
-): string {
-  // Only the parts that are set: "Comedy · Up to 2 h" reads better than
-  // "Up to 2 h · Comedy · Any year".
-  const parts: string[] = [];
-  if (preferences.genreIds.length > 0) {
-    parts.push(
-      preferences.genreIds
-        .map((id) => genreNames.get(id) ?? "Unknown")
-        .join(", ")
-    );
-  }
-  if (preferences.animation !== "any") {
-    parts.push(
-      preferences.animation === "only" ? "Only animated" : "Not animated"
-    );
-  }
-  if (preferences.ratings.length > 0) {
-    parts.push(preferences.ratings.map(ratingLabel).join(", "));
-  }
-  if (preferences.maxRuntime !== null) {
-    parts.push(`Up to ${formatRuntime(preferences.maxRuntime)}`);
-  }
-  const { minYear, maxYear } = preferences;
-  if (minYear !== null || maxYear !== null) {
-    parts.push(
-      minYear === null
-        ? `Up to ${String(maxYear)}`
-        : maxYear === null
-          ? `${String(minYear)} or later`
-          : minYear === maxYear
-            ? String(minYear)
-            : `${String(minYear)}–${String(maxYear)}`
-    );
-  }
-  return parts.length === 0 ? "Anything" : parts.join(" · ");
+export function countPreferences(preferences: Preferences): number {
+  const { maxRuntime, minYear, maxYear, genreIds, animation, ratings } =
+    preferences;
+  return [
+    genreIds.length > 0,
+    animation !== "any",
+    ratings.length > 0,
+    maxRuntime !== null,
+    minYear !== null || maxYear !== null,
+  ].filter(Boolean).length;
 }
 
 /** 135 → "2 h 15 min". */

@@ -13,7 +13,6 @@ import {
   answerMovie,
   canUndo,
   countMatches,
-  describeDeckPreferences,
   getCard,
   listPreferenceGenres,
   readDeckState,
@@ -33,8 +32,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
   const { group } = await parent();
 
   const preferences = preferencesFromQuery(url.searchParams);
-  const [mood, genres, deck] = await Promise.all([
-    describeDeckPreferences(db, preferences),
+  const [genres, deck] = await Promise.all([
     // For changing preferences from the deck.
     listPreferenceGenres(db),
     readDeckState(db, {
@@ -44,7 +42,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
       exclude: [],
     }),
   ]);
-  return { preferences, mood, genres, deck };
+  return { preferences, genres, deck };
 };
 
 const answerSchema = z.object({

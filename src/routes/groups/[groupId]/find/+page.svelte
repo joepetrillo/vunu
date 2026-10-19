@@ -23,6 +23,7 @@
   import * as Sheet from "#lib/components/ui/sheet/index.ts";
   import { Spinner } from "#lib/components/ui/spinner/index.ts";
   import {
+    countPreferences,
     describeMovie,
     hasPreferences,
     preferencesToQuery,
@@ -66,6 +67,7 @@
   // Changing preferences opens a sheet over the deck; picking new ones
   // navigates to this page with a new query, which closes it.
   let moodOpen = $state(false);
+  let moodCount = $derived(countPreferences(data.preferences));
   afterNavigate(() => {
     moodOpen = false;
   });
@@ -129,22 +131,23 @@
       <Badge class="tabular-nums">{formatCount(deck.matchCount)}</Badge>
     </Button>
   </header>
-  <!-- Your preferences for tonight; nobody else sees them. At most two
-       lines, so long preferences never squeeze the card much. -->
+  <!-- Your preferences for tonight; nobody else sees them. One line with a
+       count, whatever you pick, so the card keeps its size; the sheet shows
+       them in full. -->
   <Sheet.Root bind:open={moodOpen}>
     <Sheet.Trigger
-      class="mt-3 flex w-full items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      class="mt-3 flex h-12 w-full items-center gap-3 rounded-2xl border px-4 text-left transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
-      <span
-        class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+      <HugeiconsIcon icon={SlidersHorizontalIcon} class="size-5 shrink-0" />
+      <span class="min-w-0 flex-1 truncate font-medium">In the mood for</span>
+      <Badge
+        variant={moodCount === 0 ? "secondary" : "default"}
+        class="shrink-0 tabular-nums"
       >
-        <HugeiconsIcon icon={SlidersHorizontalIcon} class="size-5" />
-      </span>
-      <span class="flex min-w-0 flex-1 flex-col">
-        <span class="text-xs text-muted-foreground">In the mood for</span>
-        <span class="line-clamp-2 font-medium">{data.mood}</span>
-      </span>
-      <span class="shrink-0 text-sm font-medium">Change</span>
+        {moodCount === 0
+          ? "Anything"
+          : `${String(moodCount)} ${moodCount === 1 ? "filter" : "filters"}`}
+      </Badge>
     </Sheet.Trigger>
     <Sheet.Content
       side="bottom"

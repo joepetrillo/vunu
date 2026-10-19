@@ -133,7 +133,7 @@ async function findMovie(page: Page, genre: TestGenre): Promise<void> {
   await expect(page).toHaveURL(
     new RegExp(`/find\\?.*genreIds=${String(genre.id)}`)
   );
-  await expect(moodBar(page)).toContainText(genre.name);
+  await expect(moodBar(page)).toContainText("1 filter");
 }
 
 /** The deck's "In the mood for" bar, which opens the preferences. */
@@ -331,8 +331,20 @@ test("changes preferences from the deck's mood bar", async ({ page }) => {
 
   await expect(sheet).toBeHidden();
   await expect(page).toHaveURL(/animation=exclude/);
-  await expect(moodBar(page)).toContainText(`${horror.name} · Not animated`);
+  await expect(moodBar(page)).toContainText("2 filters");
   await expect(card(page)).toHaveText(title(horror, 0));
+
+  // The sheet is where the picks show in full.
+  await moodBar(page).click();
+  await expect(
+    sheet.getByRole("checkbox", { name: horror.name })
+  ).toBeChecked();
+  await expect(
+    sheet.getByRole("checkbox", { name: comedy.name })
+  ).not.toBeChecked();
+  await expect(
+    sheet.getByRole("radio", { name: "Not animated" })
+  ).toBeChecked();
 });
 
 test("doesn't poll while an answer is being saved", async ({ page }) => {

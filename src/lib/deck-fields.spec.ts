@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   describeMovie,
-  describePreferences,
+  countPreferences,
   NO_PREFERENCES,
   preferencesFromQuery,
   preferencesToQuery,
@@ -11,11 +11,6 @@ import { NO_BREAK_SPACE } from "#lib/format.ts";
 
 // Preferences live only in the deck's URL, so the query is their storage
 // format: it must round-trip, and a bad link must still open the deck.
-
-const genres = new Map([
-  [18, "Drama"],
-  [35, "Comedy"],
-]);
 
 describe("preferences in the URL", () => {
   it("round-trips through the query, with genres sorted and deduplicated", () => {
@@ -62,36 +57,21 @@ describe("preferences in the URL", () => {
   });
 });
 
-describe("describePreferences", () => {
-  it("says Anything when nothing is set", () => {
-    expect(describePreferences(NO_PREFERENCES, genres)).toBe("Anything");
-  });
-
-  it("lists only the parts that are set", () => {
+describe("countPreferences", () => {
+  it("counts each kind of preference once", () => {
+    expect(countPreferences(NO_PREFERENCES)).toBe(0);
     expect(
-      describePreferences({ ...NO_PREFERENCES, genreIds: [35] }, genres)
-    ).toBe("Comedy");
-    expect(
-      describePreferences(
-        {
-          maxRuntime: 120,
-          minYear: 1990,
-          maxYear: 2009,
-          genreIds: [18, 35],
-          animation: "exclude",
-          ratings: ["PG-13", "NR"],
-        },
-        genres
-      )
-    ).toBe(
-      "Drama, Comedy · Not animated · PG-13, Not rated · Up to 2 h · 1990–2009"
-    );
-    expect(
-      describePreferences({ ...NO_PREFERENCES, animation: "only" }, genres)
-    ).toBe("Only animated");
-    expect(
-      describePreferences({ ...NO_PREFERENCES, minYear: 2000 }, genres)
-    ).toBe("2000 or later");
+      countPreferences({
+        maxRuntime: 120,
+        minYear: 1990,
+        maxYear: 2009,
+        genreIds: [18, 35],
+        animation: "exclude",
+        ratings: ["PG-13", "NR"],
+      })
+    ).toBe(5);
+    // A year range is one preference, even with one end open.
+    expect(countPreferences({ ...NO_PREFERENCES, maxYear: 2009 })).toBe(1);
   });
 });
 
