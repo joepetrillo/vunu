@@ -71,8 +71,12 @@ import {
 // group's row, like membership changes. Callers pass inputs that already
 // passed #lib/deck-fields.ts; this module checks permissions.
 
-/** Movies with fewer TMDB votes are too obscure to deal. Revisit in stage 9. */
-export const VOTE_COUNT_FLOOR = 200;
+/**
+ * Movies with fewer TMDB votes are too obscure to deal. Chosen with the full
+ * catalog in (2026-10-19): niche picks sat below it, and narrow preferences
+ * still leave hundreds of movies.
+ */
+export const VOTE_COUNT_FLOOR = 1000;
 /** How many cards one request deals: the visible card plus a small queue. */
 export const DEAL_SIZE = 6;
 /** How long a Not seen counts: people watch movies elsewhere and never say. */

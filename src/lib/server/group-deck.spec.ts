@@ -205,7 +205,7 @@ beforeEach(async () => {
 describe("deck order", () => {
   it("deals the best weighted rating first, then by movie ID", async () => {
     // Weighted: (votes × rating + 500 × 6.5) / (votes + 500).
-    const fewVotes = await movie(world, { voteAverage: 9, voteCount: 250 }); // 7.33
+    const fewVotes = await movie(world, { voteAverage: 9, voteCount: 1000 }); // 8.17
     const many = await movie(world, { voteAverage: 8.4, voteCount: 30_000 }); // 8.37
     const ok = await movie(world, { voteAverage: 7, voteCount: 5000 }); // 6.95
     const tieLow = await movie(world, {
