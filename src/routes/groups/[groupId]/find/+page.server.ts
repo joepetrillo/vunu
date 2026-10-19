@@ -13,8 +13,8 @@ import {
   answerMovie,
   canUndo,
   countMatches,
-  describeDeckPreferences,
   getCard,
+  listPreferenceGenres,
   readDeckState,
   undoLastAnswer,
 } from "#lib/server/group-deck.ts";
@@ -24,23 +24,25 @@ import type { Actions, PageServerLoad } from "./$types";
 
 // The group deck. Tonight's preferences live in this page's URL query
 // (?maxRuntime=120&genreIds=35), so they start fresh every time you come
-// from the group page and nothing about them is stored.
+// from the group page (through "In the mood for") and nothing about them is
+// stored.
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
   const user = requireUser(locals);
   // The layout's membership check first (see ../+layout.server.ts).
   const { group } = await parent();
 
   const preferences = preferencesFromQuery(url.searchParams);
-  return {
-    preferences,
-    mood: await describeDeckPreferences(db, preferences),
-    deck: await readDeckState(db, {
+  const [genres, deck] = await Promise.all([
+    // For changing preferences from the deck.
+    listPreferenceGenres(db),
+    readDeckState(db, {
       groupId: group.id,
       userId: user.id,
       preferences,
       exclude: [],
     }),
-  };
+  ]);
+  return { preferences, genres, deck };
 };
 
 const answerSchema = z.object({

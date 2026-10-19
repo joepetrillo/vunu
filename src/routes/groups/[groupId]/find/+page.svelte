@@ -1,24 +1,35 @@
 <script lang="ts">
-  import { beforeNavigate, goto, refreshAll } from "$app/navigation";
+  import {
+    afterNavigate,
+    beforeNavigate,
+    goto,
+    refreshAll,
+  } from "$app/navigation";
   import { resolve } from "$app/paths";
   import type { ResolvedPathname } from "$app/types";
   import ArrowLeft01Icon from "@hugeicons/core-free-icons/ArrowLeft01Icon";
+  import SlidersHorizontalIcon from "@hugeicons/core-free-icons/SlidersHorizontalIcon";
   import Undo02Icon from "@hugeicons/core-free-icons/Undo02Icon";
   import { HugeiconsIcon } from "@hugeicons/svelte";
   import { prefersReducedMotion } from "svelte/motion";
   import { fly } from "svelte/transition";
 
   import MoviePoster from "#lib/components/MoviePoster.svelte";
+  import PreferenceFields from "#lib/components/PreferenceFields.svelte";
   import { Badge } from "#lib/components/ui/badge/index.ts";
   import { Button } from "#lib/components/ui/button/index.ts";
   import * as Card from "#lib/components/ui/card/index.ts";
+  import * as Field from "#lib/components/ui/field/index.ts";
+  import * as Sheet from "#lib/components/ui/sheet/index.ts";
   import { Spinner } from "#lib/components/ui/spinner/index.ts";
   import {
+    countPreferences,
     describeMovie,
     hasPreferences,
     preferencesToQuery,
     REVIEW_PROMPT_AT,
   } from "#lib/deck-fields.ts";
+  import { dropEmptyFields } from "#lib/drop-empty-fields.ts";
   import { formatCount, listNames } from "#lib/format.ts";
 
   import type { PageProps } from "./$types";
@@ -51,11 +62,15 @@
       ? resolve("/groups/[groupId]/matches", groupId)
       : resolve(`/groups/[groupId]/matches?${query}` as const, groupId)
   );
-  let preferencesHref = $derived(
-    query === ""
-      ? resolve("/groups/[groupId]/find/preferences", groupId)
-      : resolve(`/groups/[groupId]/find/preferences?${query}` as const, groupId)
-  );
+  let deckHref = $derived(resolve("/groups/[groupId]/find", groupId));
+
+  // Changing preferences opens a sheet over the deck; picking new ones
+  // navigates to this page with a new query, which closes it.
+  let moodOpen = $state(false);
+  let moodCount = $derived(countPreferences(data.preferences));
+  afterNavigate(() => {
+    moodOpen = false;
+  });
 
   // Leaving the page drops answers still waiting to be sent, so any link
   // (back, Matches, preferences) waits for them first. A failed save
@@ -116,18 +131,54 @@
       <Badge class="tabular-nums">{formatCount(deck.matchCount)}</Badge>
     </Button>
   </header>
-  <!-- Your preferences for tonight; nobody else sees them. -->
-  <div class="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-    <span class="truncate">In the mood for: {data.mood}</span>
-    <Button
-      href={preferencesHref}
-      variant="link"
-      size="sm"
-      class="h-auto shrink-0 px-1"
+  <!-- Your preferences for tonight; nobody else sees them. One line with a
+       count, whatever you pick, so the card keeps its size; the sheet shows
+       them in full. -->
+  <Sheet.Root bind:open={moodOpen}>
+    <Sheet.Trigger
+      class="mt-3 flex h-12 w-full items-center gap-3 rounded-2xl border px-4 text-left transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
-      Change
-    </Button>
-  </div>
+      <HugeiconsIcon icon={SlidersHorizontalIcon} class="size-5 shrink-0" />
+      <span class="min-w-0 flex-1 truncate font-medium">In the mood for</span>
+      <Badge
+        variant={moodCount === 0 ? "secondary" : "default"}
+        class="shrink-0 tabular-nums"
+      >
+        {moodCount === 0
+          ? "Anything"
+          : `${String(moodCount)} ${moodCount === 1 ? "filter" : "filters"}`}
+      </Badge>
+    </Sheet.Trigger>
+    <Sheet.Content
+      side="bottom"
+      class="max-h-[90dvh] rounded-t-3xl sm:mx-auto sm:max-w-md"
+    >
+      <Sheet.Header>
+        <Sheet.Title class="text-xl font-bold">In the mood for</Sheet.Title>
+        <Sheet.Description>Just for you, just for tonight.</Sheet.Description>
+      </Sheet.Header>
+      <!-- The same GET form as the first step: the deck reloads with the
+           new preferences in its URL. -->
+      <form
+        method="GET"
+        action={deckHref}
+        onformdata={dropEmptyFields}
+        class="flex min-h-0 flex-1 flex-col"
+      >
+        <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-2">
+          <Field.Group>
+            <PreferenceFields genres={data.genres} initial={data.preferences} />
+          </Field.Group>
+        </div>
+        <Sheet.Footer
+          class="border-t pt-4 pb-[max(env(safe-area-inset-bottom),1.5rem)]"
+        >
+          <Button type="submit" size="lg">Show movies</Button>
+          <Button variant="ghost" href={deckHref}>Anything is fine</Button>
+        </Sheet.Footer>
+      </form>
+    </Sheet.Content>
+  </Sheet.Root>
 
   <main class="flex min-h-0 flex-1 flex-col items-center justify-center py-4">
     {#if deck.refused !== null}
@@ -212,7 +263,7 @@
         <div class="mt-6 flex flex-col gap-3">
           <Button size="lg" href={matchesHref}>See the matches</Button>
           {#if hasPreferences(data.preferences)}
-            <Button variant="ghost" href={preferencesHref}>
+            <Button variant="ghost" onclick={() => (moodOpen = true)}>
               Change preferences
             </Button>
           {/if}

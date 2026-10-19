@@ -25,7 +25,7 @@
   <Button
     size="lg"
     class="mb-8 w-full"
-    href={resolve("/groups/[groupId]/find", groupId)}
+    href={resolve("/groups/[groupId]/find/preferences", groupId)}
   >
     Find a movie
   </Button>

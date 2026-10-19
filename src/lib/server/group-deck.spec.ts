@@ -1,8 +1,13 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
-import { NO_PREFERENCES, type Preferences } from "#lib/deck-fields.ts";
 import {
+  ANIMATION_GENRE_ID,
+  NO_PREFERENCES,
+  type Preferences,
+} from "#lib/deck-fields.ts";
+import {
+  genres,
   groups,
   movieGenres,
   type NewMovie,
@@ -299,6 +304,39 @@ describe("deck order", () => {
     expect(
       await deal(world, world.me, prefs(world, { minYear: 2000 }))
     ).toContain(short);
+  });
+
+  it("applies animation and age rating preferences to new movies", async () => {
+    // TMDB's real Animation genre; the catalog may already have it.
+    await db
+      .insert(genres)
+      .values({ id: ANIMATION_GENRE_ID, name: "Animation" })
+      .onConflictDoNothing();
+    const cartoon = await movie(world, {
+      genreIds: [world.genreId, ANIMATION_GENRE_ID],
+      usCertification: "PG",
+    });
+    const rated = await movie(world, { usCertification: "R" });
+    const adultsOnly = await movie(world, { usCertification: "NC-17" });
+    const notRated = await movie(world, { usCertification: "NR" });
+    const unknown = await movie(world, { usCertification: null });
+    const dealt = async (more: Partial<Preferences>) =>
+      (await deal(world, world.me, prefs(world, more))).toSorted(
+        (a, b) => a - b
+      );
+    const sorted = (ids: number[]) => ids.toSorted((a, b) => a - b);
+
+    expect(await dealt({ animation: "only" })).toEqual([cartoon]);
+    expect(await dealt({ animation: "exclude" })).toEqual(
+      sorted([rated, adultsOnly, notRated, unknown])
+    );
+    // R includes NC-17; Not rated includes a missing rating.
+    expect(await dealt({ ratings: ["R"] })).toEqual(
+      sorted([rated, adultsOnly])
+    );
+    expect(await dealt({ ratings: ["PG", "NR"] })).toEqual(
+      sorted([cartoon, notRated, unknown])
+    );
   });
 });
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   describeMovie,
-  describePreferences,
+  countPreferences,
   NO_PREFERENCES,
   preferencesFromQuery,
   preferencesToQuery,
@@ -12,15 +12,10 @@ import { NO_BREAK_SPACE } from "#lib/format.ts";
 // Preferences live only in the deck's URL, so the query is their storage
 // format: it must round-trip, and a bad link must still open the deck.
 
-const genres = new Map([
-  [18, "Drama"],
-  [35, "Comedy"],
-]);
-
 describe("preferences in the URL", () => {
   it("round-trips through the query, with genres sorted and deduplicated", () => {
     const query = new URLSearchParams(
-      "maxRuntime=120&minYear=1990&maxYear=2009&genreIds=35&genreIds=18&genreIds=35"
+      "maxRuntime=120&minYear=1990&maxYear=2009&genreIds=35&genreIds=18&genreIds=35&animation=exclude&ratings=R&ratings=PG-13&ratings=R"
     );
     const preferences = preferencesFromQuery(query);
     expect(preferences).toEqual({
@@ -28,6 +23,9 @@ describe("preferences in the URL", () => {
       minYear: 1990,
       maxYear: 2009,
       genreIds: [18, 35],
+      animation: "exclude",
+      // In the order they're offered.
+      ratings: ["PG-13", "R"],
     });
     expect(
       preferencesFromQuery(new URLSearchParams(preferencesToQuery(preferences)))
@@ -39,6 +37,8 @@ describe("preferences in the URL", () => {
       "maxRuntime=abc",
       "minYear=2010&maxYear=1990",
       "genreIds=-1",
+      "animation=sometimes",
+      "ratings=X",
     ]) {
       expect(preferencesFromQuery(new URLSearchParams(query))).toEqual(
         NO_PREFERENCES
@@ -49,26 +49,29 @@ describe("preferences in the URL", () => {
   it("writes nothing for no preferences", () => {
     expect(preferencesToQuery(NO_PREFERENCES)).toBe("");
   });
+
+  it("reads the empty Any choices as no preferences", () => {
+    expect(
+      preferencesFromQuery(new URLSearchParams("animation=&maxRuntime="))
+    ).toEqual(NO_PREFERENCES);
+  });
 });
 
-describe("describePreferences", () => {
-  it("says Anything when nothing is set", () => {
-    expect(describePreferences(NO_PREFERENCES, genres)).toBe("Anything");
-  });
-
-  it("lists only the parts that are set", () => {
+describe("countPreferences", () => {
+  it("counts each kind of preference once", () => {
+    expect(countPreferences(NO_PREFERENCES)).toBe(0);
     expect(
-      describePreferences({ ...NO_PREFERENCES, genreIds: [35] }, genres)
-    ).toBe("Comedy");
-    expect(
-      describePreferences(
-        { maxRuntime: 120, minYear: 1990, maxYear: 2009, genreIds: [18, 35] },
-        genres
-      )
-    ).toBe("Drama, Comedy · Up to 2 h · 1990–2009");
-    expect(
-      describePreferences({ ...NO_PREFERENCES, minYear: 2000 }, genres)
-    ).toBe("2000 or later");
+      countPreferences({
+        maxRuntime: 120,
+        minYear: 1990,
+        maxYear: 2009,
+        genreIds: [18, 35],
+        animation: "exclude",
+        ratings: ["PG-13", "NR"],
+      })
+    ).toBe(5);
+    // A year range is one preference, even with one end open.
+    expect(countPreferences({ ...NO_PREFERENCES, maxYear: 2009 })).toBe(1);
   });
 });
 

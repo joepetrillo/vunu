@@ -12,6 +12,25 @@ export const RUNTIME_MAX = 600;
 export const YEAR_MIN = 1870;
 export const YEAR_MAX = 2100;
 
+/** TMDB's Animation genre. It has its own field, so it isn't a genre chip. */
+export const ANIMATION_GENRE_ID = 16;
+
+/** Any, no animated movies, or only animated movies. */
+export const ANIMATION_CHOICES = ["any", "exclude", "only"] as const;
+export type Animation = (typeof ANIMATION_CHOICES)[number];
+
+/**
+ * US age ratings people can pick, in the order they're offered. R includes
+ * NC-17 (rare, and few people know it); NR is everything else, unknown
+ * included.
+ */
+export const RATINGS = ["G", "PG", "PG-13", "R", "NR"] as const;
+export type Rating = (typeof RATINGS)[number];
+
+export function ratingLabel(rating: Rating): string {
+  return rating === "NR" ? "Not rated" : rating;
+}
+
 /**
  * What one person is in the mood for tonight. Personal and per visit: they
  * live in the deck's URL, never in the database, and pick only the new
@@ -23,6 +42,9 @@ export interface Preferences {
   maxYear: number | null;
   /** Any of these; empty means every genre. Sorted, no duplicates. */
   genreIds: number[];
+  animation: Animation;
+  /** Any of these; empty means every rating. In RATINGS order. */
+  ratings: Rating[];
 }
 
 export const NO_PREFERENCES: Preferences = {
@@ -30,6 +52,8 @@ export const NO_PREFERENCES: Preferences = {
   minYear: null,
   maxYear: null,
   genreIds: [],
+  animation: "any",
+  ratings: [],
 };
 
 // An empty field ("Any") means no limit. Out-of-range values get a message
@@ -42,10 +66,18 @@ function optionalWholeNumber(min: number, max: number, label: string) {
 }
 
 /**
- * The preference fields, as a form or the deck's URL query sends them. Genre
- * checkboxes send `genreIds` once per ticked box, so it arrives as nothing,
- * one value, or a list.
+ * A checkbox list's values (genres, ratings). Each ticked box sends the name
+ * once, so it arrives as nothing, one value, or a list.
  */
+function ticked<T extends z.ZodType<unknown, string>>(item: T) {
+  return z
+    .union([z.string(), z.array(z.string())])
+    .default([])
+    .transform((value) => (Array.isArray(value) ? value : [value]))
+    .pipe(z.array(item).max(50));
+}
+
+/** The preference fields, as a form or the deck's URL query sends them. */
 export const preferencesSchema = z
   .object({
     maxRuntime: optionalWholeNumber(
@@ -55,18 +87,19 @@ export const preferencesSchema = z
     ).default(null),
     minYear: optionalWholeNumber(YEAR_MIN, YEAR_MAX, "year").default(null),
     maxYear: optionalWholeNumber(YEAR_MIN, YEAR_MAX, "year").default(null),
-    genreIds: z
-      .union([z.string(), z.array(z.string())])
-      .default([])
-      .transform((value) => (Array.isArray(value) ? value : [value]))
-      .pipe(
-        z
-          .array(z.string().transform(Number).pipe(z.int().positive()))
-          .max(50)
-          // Sorted and deduplicated, so the same choice always compares
-          // equal (and makes the same URL).
-          .transform((ids) => [...new Set(ids)].sort((a, b) => a - b))
-      ),
+    // Sorted and deduplicated, so the same choice always compares equal
+    // (and makes the same URL).
+    genreIds: ticked(
+      z.string().transform(Number).pipe(z.int().positive())
+    ).transform((ids) => [...new Set(ids)].sort((a, b) => a - b)),
+    // "Any" is the empty radio button.
+    animation: z
+      .enum(["", ...ANIMATION_CHOICES])
+      .default("any")
+      .transform((value) => (value === "" ? "any" : value)),
+    ratings: ticked(z.enum(RATINGS)).transform((picked) =>
+      RATINGS.filter((rating) => picked.includes(rating))
+    ),
   })
   .refine(
     ({ minYear, maxYear }) =>
@@ -85,6 +118,8 @@ export function preferencesFromQuery(query: URLSearchParams): Preferences {
     minYear: query.get("minYear") ?? undefined,
     maxYear: query.get("maxYear") ?? undefined,
     genreIds: query.getAll("genreIds"),
+    animation: query.get("animation") ?? undefined,
+    ratings: query.getAll("ratings"),
   });
   return parsed.success ? parsed.data : NO_PREFERENCES;
 }
@@ -92,55 +127,44 @@ export function preferencesFromQuery(query: URLSearchParams): Preferences {
 /** The query string for these preferences (empty for none), without the "?". */
 export function preferencesToQuery(preferences: Preferences): string {
   const query = new URLSearchParams();
-  const { maxRuntime, minYear, maxYear, genreIds } = preferences;
+  const { maxRuntime, minYear, maxYear, genreIds, animation, ratings } =
+    preferences;
   if (maxRuntime !== null) query.set("maxRuntime", String(maxRuntime));
   if (minYear !== null) query.set("minYear", String(minYear));
   if (maxYear !== null) query.set("maxYear", String(maxYear));
   for (const id of genreIds) query.append("genreIds", String(id));
+  if (animation !== "any") query.set("animation", animation);
+  for (const rating of ratings) query.append("ratings", rating);
   return query.toString();
 }
 
 export function hasPreferences(preferences: Preferences): boolean {
-  const { maxRuntime, minYear, maxYear, genreIds } = preferences;
+  const { maxRuntime, minYear, maxYear, genreIds, animation, ratings } =
+    preferences;
   return (
     maxRuntime !== null ||
     minYear !== null ||
     maxYear !== null ||
-    genreIds.length > 0
+    genreIds.length > 0 ||
+    animation !== "any" ||
+    ratings.length > 0
   );
 }
 
-/** "Comedy, Drama · Up to 2 h · 1990–2009", or "Anything" for none. */
-export function describePreferences(
-  preferences: Preferences,
-  genreNames: ReadonlyMap<number, string>
-): string {
-  // Only the parts that are set: "Comedy · Up to 2 h" reads better than
-  // "Up to 2 h · Comedy · Any year".
-  const parts: string[] = [];
-  if (preferences.genreIds.length > 0) {
-    parts.push(
-      preferences.genreIds
-        .map((id) => genreNames.get(id) ?? "Unknown")
-        .join(", ")
-    );
-  }
-  if (preferences.maxRuntime !== null) {
-    parts.push(`Up to ${formatRuntime(preferences.maxRuntime)}`);
-  }
-  const { minYear, maxYear } = preferences;
-  if (minYear !== null || maxYear !== null) {
-    parts.push(
-      minYear === null
-        ? `Up to ${String(maxYear)}`
-        : maxYear === null
-          ? `${String(minYear)} or later`
-          : minYear === maxYear
-            ? String(minYear)
-            : `${String(minYear)}–${String(maxYear)}`
-    );
-  }
-  return parts.length === 0 ? "Anything" : parts.join(" · ");
+/**
+ * How many kinds of preference are set (genres count once), for the deck's
+ * "In the mood for" button. 0 means anything.
+ */
+export function countPreferences(preferences: Preferences): number {
+  const { maxRuntime, minYear, maxYear, genreIds, animation, ratings } =
+    preferences;
+  return [
+    genreIds.length > 0,
+    animation !== "any",
+    ratings.length > 0,
+    maxRuntime !== null,
+    minYear !== null || maxYear !== null,
+  ].filter(Boolean).length;
 }
 
 /** 135 → "2 h 15 min". */
