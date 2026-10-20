@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { ResolvedPathname } from "$app/types";
   import ArrowRight01Icon from "@hugeicons/core-free-icons/ArrowRight01Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
   import type { Snippet } from "svelte";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { Badge } from "#lib/components/ui/badge/index.ts";
   import * as Item from "#lib/components/ui/item/index.ts";
   import { formatCount } from "#lib/format.ts";

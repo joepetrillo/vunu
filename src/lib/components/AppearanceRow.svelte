@@ -3,8 +3,8 @@
   import Moon02Icon from "@hugeicons/core-free-icons/Moon02Icon";
   import PaintBoardIcon from "@hugeicons/core-free-icons/PaintBoardIcon";
   import Sun03Icon from "@hugeicons/core-free-icons/Sun03Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import * as Item from "#lib/components/ui/item/index.ts";
   import * as ToggleGroup from "#lib/components/ui/toggle-group/index.ts";
   import {

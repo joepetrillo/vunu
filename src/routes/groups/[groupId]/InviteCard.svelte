@@ -2,10 +2,10 @@
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
   import Share08Icon from "@hugeicons/core-free-icons/Share08Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
   import ConfirmDialog from "#lib/components/ConfirmDialog.svelte";
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { Button } from "#lib/components/ui/button/index.ts";
   import * as Card from "#lib/components/ui/card/index.ts";
 

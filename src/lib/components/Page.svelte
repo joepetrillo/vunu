@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { ResolvedPathname } from "$app/types";
   import ArrowLeft01Icon from "@hugeicons/core-free-icons/ArrowLeft01Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
   import type { Snippet } from "svelte";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { Button } from "#lib/components/ui/button/index.ts";
 
   interface Props {

@@ -5,10 +5,10 @@
   import Film01Icon from "@hugeicons/core-free-icons/Film01Icon";
   import Login03Icon from "@hugeicons/core-free-icons/Login03Icon";
   import UserCircleIcon from "@hugeicons/core-free-icons/UserCircleIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
 
   import { authClient } from "#lib/auth-client.ts";
   import AppearanceRow from "#lib/components/AppearanceRow.svelte";
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import ListGroup from "#lib/components/ListGroup.svelte";
   import NavRow from "#lib/components/NavRow.svelte";
   import Page from "#lib/components/Page.svelte";

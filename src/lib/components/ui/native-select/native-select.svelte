@@ -1,8 +1,8 @@
 <script lang="ts">
   import UnfoldMoreIcon from "@hugeicons/core-free-icons/UnfoldMoreIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
   import type { HTMLSelectAttributes } from "svelte/elements";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { cn, type WithElementRef } from "#lib/utils.ts";
 
   // Svelte types a select's `value` as `any`; options here are strings.

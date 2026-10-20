@@ -2,9 +2,9 @@
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
   import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import ListGroup from "#lib/components/ListGroup.svelte";
   import MatchList from "#lib/components/MatchList.svelte";
   import MoviePoster from "#lib/components/MoviePoster.svelte";

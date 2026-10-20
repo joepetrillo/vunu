@@ -10,10 +10,10 @@
   import ArrowLeft01Icon from "@hugeicons/core-free-icons/ArrowLeft01Icon";
   import SlidersHorizontalIcon from "@hugeicons/core-free-icons/SlidersHorizontalIcon";
   import Undo02Icon from "@hugeicons/core-free-icons/Undo02Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
   import { prefersReducedMotion } from "svelte/motion";
   import { fly } from "svelte/transition";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import MoviePoster from "#lib/components/MoviePoster.svelte";
   import PreferenceFields from "#lib/components/PreferenceFields.svelte";
   import { Badge } from "#lib/components/ui/badge/index.ts";

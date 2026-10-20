@@ -18,9 +18,24 @@
   $effect(() => {
     applyTheme(theme.dark);
   });
+
+  function keepKitScrollRestoration(event: PageTransitionEvent) {
+    if (event.persisted) history.scrollRestoration = "manual";
+  }
 </script>
 
-<svelte:window onstorage={theme.followOtherTabs} />
+<!-- Kit 3 sets history.scrollRestoration to "manual" and restores the scroll
+     position itself after a reload, but only once its JavaScript has loaded,
+     so the page first paints at the top and then jumps. Handing a page that's
+     being left back to the browser lets it restore the position before the
+     first paint; Kit's own restore then lands on the same spot and switches
+     back to "manual". A page kept in the back/forward cache never reloads, so
+     it switches back here (Kit expects "manual" for its own back and forward). -->
+<svelte:window
+  onstorage={theme.followOtherTabs}
+  onpagehide={() => (history.scrollRestoration = "auto")}
+  onpageshow={keepKitScrollRestoration}
+/>
 
 <svelte:head>
   <link rel="icon" href={favicon} />

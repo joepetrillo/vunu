@@ -1,8 +1,8 @@
 <script lang="ts">
   import Loading03Icon from "@hugeicons/core-free-icons/Loading03Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
   import type { SVGAttributes } from "svelte/elements";
 
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { cn } from "#lib/utils.ts";
 
   let {
@@ -13,7 +13,6 @@
     name,
     color,
     stroke,
-    className: legacyClassName,
     "aria-label": ariaLabel = "Loading",
     ...restProps
   }: SVGAttributes<SVGSVGElement> = $props();
@@ -26,7 +25,6 @@
   {...name != null ? { name } : {}}
   {...color != null ? { color } : {}}
   {...stroke != null ? { stroke } : {}}
-  {...legacyClassName != null ? { className: legacyClassName } : {}}
   aria-label={ariaLabel}
   class={cn("size-4 animate-spin", className)}
   {...restProps}

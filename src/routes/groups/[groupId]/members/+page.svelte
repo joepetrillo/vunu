@@ -2,10 +2,10 @@
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
   import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
   import ConfirmDialog from "#lib/components/ConfirmDialog.svelte";
+  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import ListGroup from "#lib/components/ListGroup.svelte";
   import Page from "#lib/components/Page.svelte";
   import { Badge } from "#lib/components/ui/badge/index.ts";

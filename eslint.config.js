@@ -114,6 +114,14 @@ export default defineConfig(
               message:
                 'Import each icon from its own path: import XIcon from "@hugeicons/core-free-icons/XIcon".',
             },
+            // Its component draws icons only after the JavaScript loads, so
+            // they flash in on every full page load. shadcn-svelte's CLI
+            // generates this import.
+            {
+              name: "@hugeicons/svelte",
+              message:
+                'Use our server-rendered copy: import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte".',
+            },
           ],
           patterns: [
             {
