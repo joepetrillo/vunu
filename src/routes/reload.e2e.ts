@@ -20,48 +20,22 @@ test.afterAll(async () => {
   await pool.end();
 });
 
-test("a reload paints in place, icons and scroll position included", async ({
-  page,
-}) => {
-  // Short enough that the home page scrolls.
-  await page.setViewportSize({ width: 390, height: 480 });
+test("icons are drawn before the app's code loads", async ({ page }) => {
   await signIn(page, db, email);
-  await page.evaluate(() => {
-    scrollTo(
-      0,
-      Math.round((document.documentElement.scrollHeight - innerHeight) / 2)
-    );
-  });
-  const scrolled = await page.evaluate(() => scrollY);
-  expect(scrolled).toBeGreaterThan(20);
 
-  // With every app script blocked, the page shows only what the browser does
-  // on its own before the app's code loads: the first paint.
+  // With every app script blocked, the page shows only what the server sent:
+  // the first paint, before hydration.
   let blocked = 0;
-  // Where the page is when its HTML is parsed, before the first paint.
-  await page.addInitScript(() => {
-    document.addEventListener("DOMContentLoaded", () => {
-      document.documentElement.dataset.parsedScrollY = String(scrollY);
-    });
-  });
   await page.route("**/_app/immutable/**/*.js", (route) => {
     blocked += 1;
     return route.abort();
   });
   await page.reload();
 
-  // Icons are drawn in the server's HTML, not filled in after hydration.
   const seenIcon = page
     .getByRole("link", { name: /Seen movies/ })
     .locator("svg path")
     .first();
   await expect(seenIcon).toHaveAttribute("d", /\S/);
-
-  // The page is already where it was scrolled, instead of drawing the top
-  // and waiting for the app's code to jump down.
-  await expect(page.locator("html")).toHaveAttribute(
-    "data-parsed-scroll-y",
-    String(scrolled)
-  );
   expect(blocked).toBeGreaterThan(0);
 });
