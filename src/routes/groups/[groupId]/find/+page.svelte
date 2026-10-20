@@ -7,13 +7,12 @@
   } from "$app/navigation";
   import { resolve } from "$app/paths";
   import type { ResolvedPathname } from "$app/types";
-  import ArrowLeft01Icon from "@hugeicons/core-free-icons/ArrowLeft01Icon";
-  import SlidersHorizontalIcon from "@hugeicons/core-free-icons/SlidersHorizontalIcon";
-  import Undo02Icon from "@hugeicons/core-free-icons/Undo02Icon";
+  import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
+  import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
+  import Undo2Icon from "@lucide/svelte/icons/undo-2";
   import { prefersReducedMotion } from "svelte/motion";
   import { fly } from "svelte/transition";
 
-  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import MoviePoster from "#lib/components/MoviePoster.svelte";
   import PreferenceFields from "#lib/components/PreferenceFields.svelte";
   import { Badge } from "#lib/components/ui/badge/index.ts";
@@ -123,7 +122,7 @@
       size="sm"
       class="-ml-3 min-w-0 shrink"
     >
-      <HugeiconsIcon icon={ArrowLeft01Icon} data-icon="inline-start" />
+      <ChevronLeftIcon data-icon="inline-start" />
       <span class="truncate">{data.group.name}</span>
     </Button>
     <Button href={matchesHref} variant="secondary" size="sm">
@@ -138,7 +137,7 @@
     <Sheet.Trigger
       class="mt-3 flex h-12 w-full items-center gap-3 rounded-2xl border px-4 text-left transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
-      <HugeiconsIcon icon={SlidersHorizontalIcon} class="size-5 shrink-0" />
+      <SlidersHorizontalIcon class="size-5 shrink-0" />
       <span class="min-w-0 flex-1 truncate font-medium">In the mood for</span>
       <Badge
         variant={moodCount === 0 ? "secondary" : "default"}
@@ -286,7 +285,7 @@
           deck.error !== null ||
           deck.refused !== null}
       >
-        <HugeiconsIcon icon={Undo02Icon} data-icon="inline-start" />
+        <Undo2Icon data-icon="inline-start" />
         Undo
       </Button>
       <!-- Saving is quiet; only a failure asks for anything. -->

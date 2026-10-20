@@ -1,10 +1,9 @@
 <script lang="ts">
-  import ComputerPhoneSyncIcon from "@hugeicons/core-free-icons/ComputerPhoneSyncIcon";
-  import Moon02Icon from "@hugeicons/core-free-icons/Moon02Icon";
-  import PaintBoardIcon from "@hugeicons/core-free-icons/PaintBoardIcon";
-  import Sun03Icon from "@hugeicons/core-free-icons/Sun03Icon";
+  import MonitorSmartphoneIcon from "@lucide/svelte/icons/monitor-smartphone";
+  import MoonIcon from "@lucide/svelte/icons/moon";
+  import PaletteIcon from "@lucide/svelte/icons/palette";
+  import SunIcon from "@lucide/svelte/icons/sun";
 
-  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import * as Item from "#lib/components/ui/item/index.ts";
   import * as ToggleGroup from "#lib/components/ui/toggle-group/index.ts";
   import {
@@ -17,9 +16,9 @@
   const id = $props.id();
 
   const options = [
-    { value: "light", label: "Light", icon: Sun03Icon },
-    { value: "dark", label: "Dark", icon: Moon02Icon },
-    { value: "system", label: "System", icon: ComputerPhoneSyncIcon },
+    { value: "light", label: "Light", icon: SunIcon },
+    { value: "dark", label: "Dark", icon: MoonIcon },
+    { value: "system", label: "System", icon: MonitorSmartphoneIcon },
   ] as const;
 
   // Says the pick in words, since the buttons are only icons.
@@ -34,7 +33,7 @@
 <li>
   <Item.Root class="rounded-none">
     <Item.Media>
-      <HugeiconsIcon icon={PaintBoardIcon} class="size-5" />
+      <PaletteIcon class="size-5" />
     </Item.Media>
     <!-- Room for the description: on a narrow phone the buttons move to
          their own line instead of squeezing it to "Same as…". -->
@@ -71,7 +70,7 @@
             aria-label={option.label}
             title={option.label}
           >
-            <HugeiconsIcon icon={option.icon} />
+            <option.icon />
           </ToggleGroup.Item>
         {/each}
       </ToggleGroup.Root>

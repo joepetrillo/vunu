@@ -3,12 +3,11 @@
 </script>
 
 <script lang="ts">
-  import Cancel01Icon from "@hugeicons/core-free-icons/Cancel01Icon";
+  import XIcon from "@lucide/svelte/icons/x";
   import { Dialog as SheetPrimitive } from "bits-ui";
   import type { Snippet } from "svelte";
   import type { ComponentProps } from "svelte";
 
-  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { Button } from "#lib/components/ui/button/index.ts";
   import { cn, type WithoutChildrenOrChild } from "#lib/utils.ts";
 
@@ -53,7 +52,7 @@
             size="icon-sm"
             {...props}
           >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+            <XIcon />
             <span class="sr-only">Close</span>
           </Button>
         {/snippet}

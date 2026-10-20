@@ -1,14 +1,13 @@
 <script lang="ts">
   import { refreshAll } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import Add01Icon from "@hugeicons/core-free-icons/Add01Icon";
-  import Film01Icon from "@hugeicons/core-free-icons/Film01Icon";
-  import Login03Icon from "@hugeicons/core-free-icons/Login03Icon";
-  import UserCircleIcon from "@hugeicons/core-free-icons/UserCircleIcon";
+  import CircleUserIcon from "@lucide/svelte/icons/circle-user";
+  import FilmIcon from "@lucide/svelte/icons/film";
+  import LogInIcon from "@lucide/svelte/icons/log-in";
+  import PlusIcon from "@lucide/svelte/icons/plus";
 
   import { authClient } from "#lib/auth-client.ts";
   import AppearanceRow from "#lib/components/AppearanceRow.svelte";
-  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import ListGroup from "#lib/components/ListGroup.svelte";
   import NavRow from "#lib/components/NavRow.svelte";
   import Page from "#lib/components/Page.svelte";
@@ -89,11 +88,11 @@
         variant={data.groups.length === 0 ? "default" : "secondary"}
         size="lg"
       >
-        <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+        <PlusIcon data-icon="inline-start" />
         New group
       </Button>
       <Button href={resolve("/join")} variant="secondary" size="lg">
-        <HugeiconsIcon icon={Login03Icon} data-icon="inline-start" />
+        <LogInIcon data-icon="inline-start" />
         Join a group
       </Button>
     </div>
@@ -108,7 +107,7 @@
         count={data.seenCount}
       >
         {#snippet media()}
-          <HugeiconsIcon icon={Film01Icon} class="size-5" />
+          <FilmIcon class="size-5" />
         {/snippet}
       </NavRow>
       <AppearanceRow />
@@ -116,7 +115,7 @@
         <li>
           <Item.Root class="rounded-none">
             <Item.Media>
-              <HugeiconsIcon icon={UserCircleIcon} class="size-5" />
+              <CircleUserIcon class="size-5" />
             </Item.Media>
             <Item.Content class="min-w-0">
               <Item.Title>Signed in</Item.Title>

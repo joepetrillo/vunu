@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { ResolvedPathname } from "$app/types";
-  import ArrowLeft01Icon from "@hugeicons/core-free-icons/ArrowLeft01Icon";
+  import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
   import type { Snippet } from "svelte";
 
-  import HugeiconsIcon from "#lib/components/HugeiconsIcon.svelte";
   import { Button } from "#lib/components/ui/button/index.ts";
 
   interface Props {
@@ -32,7 +31,7 @@
       size="sm"
       class="-ml-3 max-w-[calc(100%+0.75rem)]"
     >
-      <HugeiconsIcon icon={ArrowLeft01Icon} data-icon="inline-start" />
+      <ChevronLeftIcon data-icon="inline-start" />
       <span class="truncate">{back.label}</span>
     </Button>
   {/if}
