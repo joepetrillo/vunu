@@ -26,10 +26,11 @@ test("a reload paints in place, icons and scroll position included", async ({
   // Short enough that the home page scrolls.
   await page.setViewportSize({ width: 390, height: 480 });
   await signIn(page, db, email);
-  // Partway down: a position at the very bottom can come back clamped if the
-  // browser restores it before the fonts finish loading.
   await page.evaluate(() => {
-    scrollTo(0, (document.documentElement.scrollHeight - innerHeight) / 2);
+    scrollTo(
+      0,
+      Math.round((document.documentElement.scrollHeight - innerHeight) / 2)
+    );
   });
   const scrolled = await page.evaluate(() => scrollY);
   expect(scrolled).toBeGreaterThan(20);
@@ -37,6 +38,12 @@ test("a reload paints in place, icons and scroll position included", async ({
   // With every app script blocked, the page shows only what the browser does
   // on its own before the app's code loads: the first paint.
   let blocked = 0;
+  // Where the page is when its HTML is parsed, before the first paint.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.documentElement.dataset.parsedScrollY = String(scrollY);
+    });
+  });
   await page.route("**/_app/immutable/**/*.js", (route) => {
     blocked += 1;
     return route.abort();
@@ -50,12 +57,11 @@ test("a reload paints in place, icons and scroll position included", async ({
     .first();
   await expect(seenIcon).toHaveAttribute("d", /\S/);
 
-  // The browser restores the scroll position itself, instead of drawing the
-  // top of the page and waiting for the app's code to jump down. Chromium
-  // restores relative to an element on the page, which can land a few pixels
-  // off; the app's code corrects that once it loads.
-  await expect
-    .poll(async () => Math.abs((await page.evaluate(() => scrollY)) - scrolled))
-    .toBeLessThanOrEqual(4);
+  // The page is already where it was scrolled, instead of drawing the top
+  // and waiting for the app's code to jump down.
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-parsed-scroll-y",
+    String(scrolled)
+  );
   expect(blocked).toBeGreaterThan(0);
 });

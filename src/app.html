@@ -37,5 +37,44 @@
   </head>
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">%sveltekit.body%</div>
+    <!-- Puts a reloaded page back where it was scrolled before it first
+         paints. Kit restores the position too, but only after its JavaScript
+         loads, so the page would draw at the top first and then jump. This
+         runs as soon as the page's HTML and CSS are in, after the content
+         above and before Kit's code, which then finds it already in place.
+         Plain JavaScript and web APIs only: nothing here depends on Kit. -->
+    <script>
+      (function () {
+        var key = "scroll-before-leaving";
+        try {
+          var saved = JSON.parse(sessionStorage.getItem(key) || "null");
+          var navigation = performance.getEntriesByType("navigation")[0];
+          // Only the same page coming back: a reload, or Back or Forward
+          // from another site when the browser didn't keep the page in memory.
+          if (
+            saved &&
+            saved.href === location.href &&
+            navigation &&
+            (navigation.type === "reload" || navigation.type === "back_forward")
+          ) {
+            scrollTo(saved.x, saved.y);
+          }
+        } catch (error) {
+          // Storage blocked: Kit restores the position once it loads.
+        }
+        // pagehide is the one event every browser fires when a page is left,
+        // including iOS Safari, which skips beforeunload.
+        addEventListener("pagehide", function () {
+          try {
+            sessionStorage.setItem(
+              key,
+              JSON.stringify({ href: location.href, x: scrollX, y: scrollY })
+            );
+          } catch (error) {
+            // Storage blocked: nothing to restore next time.
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
