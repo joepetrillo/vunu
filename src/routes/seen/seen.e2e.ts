@@ -9,6 +9,7 @@ import {
   testMovieId,
 } from "#lib/server/testing/db.ts";
 import { deleteAccount, signIn } from "#lib/server/testing/sign-in.ts";
+import { visit } from "#lib/server/testing/visit.ts";
 
 const { pool, db } = connectTestDb();
 const fixtures = createFixtures(db);
@@ -43,7 +44,7 @@ async function signInAsNewUser(page: Page): Promise<string> {
 }
 
 async function searchAllMovies(page: Page): Promise<void> {
-  await page.goto("/seen?scope=all");
+  await visit(page, "/seen?scope=all");
   await page.getByRole("searchbox", { name: "Title" }).fill(runId);
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page).toHaveURL(`/seen?scope=all&title=${runId}`);

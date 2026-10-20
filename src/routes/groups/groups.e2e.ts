@@ -10,6 +10,7 @@ import {
   readSignInCode,
   signIn,
 } from "#lib/server/testing/sign-in.ts";
+import { visit } from "#lib/server/testing/visit.ts";
 
 const { pool, db } = connectTestDb();
 
@@ -51,7 +52,7 @@ async function newPerson(browser: Browser): Promise<Page> {
 }
 
 async function createGroup(page: Page, name: string, nickname: string) {
-  await page.goto("/");
+  await visit(page, "/");
   await page.getByRole("link", { name: "New group" }).click();
   await page.getByLabel("Group name").fill(name);
   await page.getByLabel("What should this group call you?").fill(nickname);
@@ -75,7 +76,7 @@ test("a second account joins by link, a third by code", async ({ browser }) => {
 
   // By link: the invite page names the group and asks for a nickname.
   const friend = await newPerson(browser);
-  await friend.goto(`/join/${code}`);
+  await visit(friend, `/join/${code}`);
   await expect(
     friend.getByRole("heading", { name: "Join Movie night?" })
   ).toBeVisible();
@@ -109,7 +110,7 @@ test("a second account joins by link, a third by code", async ({ browser }) => {
   await expect(membersList(third)).toHaveCount(3);
 
   // The owner sees everyone and removes Alex from the row's menu.
-  await owner.goto(`/groups/${groupId}/members`);
+  await visit(owner, `/groups/${groupId}/members`);
   await expect(membersList(owner)).toHaveCount(3);
   await owner.getByRole("button", { name: "More for Alex" }).click();
   await owner.getByRole("menuitem", { name: "Remove from group" }).click();
@@ -167,14 +168,14 @@ test("leaving hands ownership on; the owner can reset the invite", async ({
   const owner = await newPerson(browser);
   const { groupId, code } = await createGroup(owner, "Handoff", "First");
   const friend = await newPerson(browser);
-  await friend.goto(`/join/${code}`);
+  await visit(friend, `/join/${code}`);
   await friend.getByLabel("What should this group call you?").fill("Second");
   await friend.getByRole("button", { name: "Join group" }).click();
   await expect(friend).toHaveURL(`/groups/${groupId}`);
 
   // Group pages don't update live: the dialog names the next owner from
   // the page's data. (The server decides under the group's lock either way.)
-  await owner.goto(`/groups/${groupId}/settings`);
+  await visit(owner, `/groups/${groupId}/settings`);
   await owner.getByRole("button", { name: "Leave group" }).click();
   const leaving = owner.getByRole("alertdialog", { name: "Leave Handoff?" });
   await expect(leaving).toContainText("Second will become the owner");
@@ -182,7 +183,7 @@ test("leaving hands ownership on; the owner can reset the invite", async ({
   await expect(owner).toHaveURL("/");
   await expect(owner.getByText("You're not in a group yet.")).toBeVisible();
 
-  await friend.goto(`/groups/${groupId}/members`);
+  await visit(friend, `/groups/${groupId}/members`);
   await expect(membersList(friend)).toHaveText([/Second\s+\(you\)\s+Owner/]);
   await friend.getByRole("button", { name: "Reset invite" }).click();
   await friend
@@ -199,7 +200,7 @@ test("leaving hands ownership on; the owner can reset the invite", async ({
   );
 
   // Typed on the Join a group screen, it stays there with the same message.
-  await owner.goto("/join");
+  await visit(owner, "/join");
   const input = owner.getByLabel("Invite code");
   await input.fill(code);
   await expect(owner.getByRole("alert")).toHaveText(
@@ -223,7 +224,7 @@ test("an invite link survives signing in first", async ({ browser }) => {
 
   // Someone without an account taps the link: sign in, then back to it.
   const newcomer = await newBrowser(browser);
-  await newcomer.goto(`/join/${code}`);
+  await visit(newcomer, `/join/${code}`);
   await expect(newcomer).toHaveURL(/\/sign-in\?/);
   const email = newEmail();
   await newcomer.getByLabel("Email").fill(email);

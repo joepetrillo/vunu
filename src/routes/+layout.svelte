@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { onMount, type Snippet } from "svelte";
 
   import "./layout.css";
   import favicon from "#lib/assets/favicon.svg";
@@ -17,6 +17,13 @@
   // The script in app.html already did the first paint.
   $effect(() => {
     applyTheme(theme.dark);
+  });
+
+  // The root layout mounts last, once the whole page is running. Browser
+  // tests wait for this mark before tapping (visit() in
+  // #lib/server/testing/visit.ts).
+  onMount(() => {
+    document.body.classList.add("started");
   });
 </script>
 

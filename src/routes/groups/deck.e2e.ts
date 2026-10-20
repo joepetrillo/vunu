@@ -15,6 +15,7 @@ import {
 import { answerMovie, VOTE_COUNT_FLOOR } from "#lib/server/group-deck.ts";
 import { connectTestDb, createFixtures } from "#lib/server/testing/db.ts";
 import { deleteAccount, signIn } from "#lib/server/testing/sign-in.ts";
+import { visit } from "#lib/server/testing/visit.ts";
 
 // The group deck (stage 8): no sessions, everyone in the group counts, and
 // tonight's preferences pick only new movies. Each person prefers a test
@@ -175,7 +176,7 @@ test("two people with different preferences reach a match from the group page", 
   // Alex is in the mood for comedy, Sam for horror. No setup beyond that.
   await findMovie(alex, comedy);
   await expect(card(alex)).toHaveText(title(comedy, 0));
-  await sam.goto(`/groups/${groupId}`);
+  await visit(sam, `/groups/${groupId}`);
   await findMovie(sam, horror);
   await expect(card(sam)).toHaveText(title(horror, 0));
 

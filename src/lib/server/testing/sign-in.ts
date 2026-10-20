@@ -10,6 +10,7 @@ import {
 } from "#lib/server/db/schema.ts";
 
 import { TEST_AUTH_SECRET } from "./environment.ts";
+import { visit } from "./visit.ts";
 
 // Sign-in helpers for end-to-end tests. Locally codes aren't emailed, so tests
 // read them from the database.
@@ -36,9 +37,9 @@ export async function readSignInCode(db: Db, email: string): Promise<string> {
 
 /** Signs in through the sign-in page, creating the account if it's new. */
 export async function signIn(page: Page, db: Db, email: string): Promise<void> {
-  // Waits for the app's code, not just the page: the form signs in only once
-  // hydrated, and a click before that posts it to a page with no action.
-  await page.goto("/sign-in", { waitUntil: "networkidle" });
+  // The form signs in only once the app's code runs; a click before that
+  // posts it to a page with no action.
+  await visit(page, "/sign-in");
   await page.getByLabel("Email").fill(email);
   await page.getByRole("button", { name: "Email me a code" }).click();
   await expect(page.getByText("We sent a 6-digit code")).toBeVisible();
