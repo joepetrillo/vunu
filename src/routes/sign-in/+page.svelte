@@ -1,6 +1,5 @@
 <script lang="ts">
   import { refreshAll } from "$app/navigation";
-  import { REGEXP_ONLY_DIGITS } from "bits-ui";
   import { tick } from "svelte";
 
   import { authClient } from "#lib/auth-client.ts";
@@ -161,11 +160,10 @@
           <!-- The input defaults to autocomplete="one-time-code", so phones
                offer the emailed code above the keyboard. -->
           <CodeInput
-            inputId="code"
+            id="code"
             name="code"
-            maxlength={6}
-            pattern={REGEXP_ONLY_DIGITS}
-            pasteTransformer={(text: string) => text.replace(/\D/g, "")}
+            length={6}
+            clean={(text: string) => text.replace(/\D/g, "")}
             enterkeyhint="done"
             required
             disabled={pending !== null}

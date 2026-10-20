@@ -18,14 +18,11 @@
 
   let code = $state("");
   let finding = $state(false);
-  // Any letter or digit lands in a box, in either case (the binding below
-  // uppercases it). Codes leave out 0, O, 1, I, and L, but refusing those
-  // keys silently feels broken, so they're let in and the server answers
-  // with its usual "not an active invite code".
-  const codeCharacters = "^[A-Za-z0-9]+$";
-
-  // A pasted "k7q-m2x" becomes "K7QM2X" before it's cut to six characters.
-  function cleanPaste(text: string) {
+  // Any letter or digit lands in a box, uppercased: a typed or pasted
+  // "k7q-m2x" becomes "K7QM2X". Codes leave out 0, O, 1, I, and L, but
+  // refusing those keys silently feels broken, so they're let in and the
+  // server answers with its usual "not an active invite code".
+  function cleanCode(text: string) {
     return text.toUpperCase().replace(/[^A-Z0-9]/g, "");
   }
 </script>
@@ -50,11 +47,10 @@
     <Field.Field data-invalid={error !== undefined}>
       <Field.Label for="{id}-code">Invite code</Field.Label>
       <CodeInput
-        inputId="{id}-code"
+        id="{id}-code"
         name="code"
-        maxlength={INVITE_CODE_LENGTH}
-        pattern={codeCharacters}
-        pasteTransformer={cleanPaste}
+        length={INVITE_CODE_LENGTH}
+        clean={cleanCode}
         inputmode="text"
         autocomplete="off"
         autocapitalize="characters"
@@ -62,7 +58,7 @@
         required
         invalid={error !== undefined}
         aria-describedby={error === undefined ? undefined : `${id}-error`}
-        bind:value={() => code, (typed: string) => (code = typed.toUpperCase())}
+        bind:value={code}
       />
       {#if error}
         <Field.Error id="{id}-error">{error}</Field.Error>

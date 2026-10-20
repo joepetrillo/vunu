@@ -60,6 +60,37 @@ it("cleans up a pasted code", async () => {
   await expect.element(input).toHaveValue("K7QM2X");
 });
 
+it("never leaves text selected, so iOS shows no selection handles", async () => {
+  await render(JoinCodeForm, {});
+  const input = page.getByLabelText("Invite code");
+  const field = input.element() as HTMLInputElement;
+  const selection = () => [field.selectionStart, field.selectionEnd];
+
+  await userEvent.click(input);
+  await userEvent.keyboard("k7qm2x");
+  // A full code keeps a plain caret after it (input-otp selected the last
+  // character here, which is what drew the handles).
+  await expect.poll(selection).toEqual([6, 6]);
+  // Selecting text by hand collapses back to the caret.
+  field.setSelectionRange(0, 6);
+  await expect.poll(selection).toEqual([6, 6]);
+  field.setSelectionRange(2, 2);
+  await expect.poll(selection).toEqual([6, 6]);
+});
+
+it("takes an autofilled code whole, even over a partial one", async () => {
+  await render(JoinCodeForm, {});
+  const input = page.getByLabelText("Invite code");
+  await userEvent.click(input);
+  await userEvent.keyboard("ab");
+  // Autofill sets the field's text and fires a plain input event.
+  const field = input.element() as HTMLInputElement;
+  field.value = "ABK7QM2X";
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+  await expect.element(input).toHaveValue("K7QM2X");
+  expect(submitted).toHaveBeenCalledOnce();
+});
+
 it("shows the error next to the field", async () => {
   await render(JoinCodeForm, { error: "That's not an active invite code." });
   await expect
