@@ -107,12 +107,12 @@ export default defineConfig(
           paths: [
             { name: "$app/environment", message: "Kit 3: use $app/env." },
             { name: "$app/stores", message: "Kit 3: use $app/state." },
-            // The package root re-exports thousands of icons, which Vite then
-            // processes on every build. shadcn-svelte's CLI generates this form.
+            // The package root re-exports every icon, which Vite then
+            // processes in dev and on every build.
             {
-              name: "@hugeicons/core-free-icons",
+              name: "@lucide/svelte",
               message:
-                'Import each icon from its own path: import XIcon from "@hugeicons/core-free-icons/XIcon".',
+                'Import each icon from its own path: import XIcon from "@lucide/svelte/icons/x".',
             },
           ],
           patterns: [

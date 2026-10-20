@@ -1,8 +1,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
-  import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
+  import EllipsisIcon from "@lucide/svelte/icons/ellipsis";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
   import ListGroup from "#lib/components/ListGroup.svelte";
@@ -74,7 +73,7 @@
           size="icon"
           aria-label={`More for ${movie.title}`}
         >
-          <HugeiconsIcon icon={MoreHorizontalIcon} />
+          <EllipsisIcon />
         </Button>
       {/snippet}
     </DropdownMenu.Trigger>

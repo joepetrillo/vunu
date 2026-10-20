@@ -1,6 +1,5 @@
 <script lang="ts">
-  import UnfoldMoreIcon from "@hugeicons/core-free-icons/UnfoldMoreIcon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
+  import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
   import type { HTMLSelectAttributes } from "svelte/elements";
 
   import { cn, type WithElementRef } from "#lib/utils.ts";
@@ -42,9 +41,7 @@
   >
     {@render children?.()}
   </select>
-  <HugeiconsIcon
-    icon={UnfoldMoreIcon}
-    strokeWidth={2}
+  <ChevronsUpDownIcon
     class="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted-foreground select-none"
     aria-hidden
     data-slot="native-select-icon"

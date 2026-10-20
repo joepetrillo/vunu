@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { ResolvedPathname } from "$app/types";
-  import ArrowRight01Icon from "@hugeicons/core-free-icons/ArrowRight01Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
+  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import type { Snippet } from "svelte";
 
   import { Badge } from "#lib/components/ui/badge/index.ts";
@@ -45,8 +44,7 @@
             >{formatCount(count)}</Badge
           >
         {/if}
-        <HugeiconsIcon
-          icon={ArrowRight01Icon}
+        <ChevronRightIcon
           class="size-5 shrink-0 text-muted-foreground"
           aria-hidden="true"
         />

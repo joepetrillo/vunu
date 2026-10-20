@@ -1,8 +1,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
-  import Share08Icon from "@hugeicons/core-free-icons/Share08Icon";
-  import { HugeiconsIcon } from "@hugeicons/svelte";
+  import Share2Icon from "@lucide/svelte/icons/share-2";
 
   import { ActionForm } from "#lib/action-form.svelte.ts";
   import ConfirmDialog from "#lib/components/ConfirmDialog.svelte";
@@ -79,7 +78,7 @@
   </Card.Content>
   <Card.Footer class="flex flex-col items-stretch gap-3">
     <Button size="lg" onclick={share}>
-      <HugeiconsIcon icon={Share08Icon} data-icon="inline-start" />
+      <Share2Icon data-icon="inline-start" />
       Share invite
     </Button>
     {#if isOwner}
