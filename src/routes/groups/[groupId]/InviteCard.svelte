@@ -74,7 +74,7 @@
     >
       {code}
     </p>
-    <p class="mt-2 text-sm break-all text-muted-foreground">{url}</p>
+    <p class="mt-2 text-sm wrap-anywhere text-muted-foreground">{url}</p>
   </Card.Content>
   <Card.Footer class="flex flex-col items-stretch gap-3">
     <Button size="lg" onclick={share}>

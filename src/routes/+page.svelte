@@ -119,7 +119,7 @@
             </Item.Media>
             <Item.Content class="min-w-0">
               <Item.Title>Signed in</Item.Title>
-              <Item.Description class="line-clamp-none break-all"
+              <Item.Description class="line-clamp-none wrap-anywhere"
                 >{data.user.email}</Item.Description
               >
             </Item.Content>
