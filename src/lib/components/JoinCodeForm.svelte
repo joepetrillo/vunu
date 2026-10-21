@@ -54,6 +54,7 @@
         inputmode="text"
         autocomplete="off"
         autocapitalize="characters"
+        autocorrect="off"
         enterkeyhint="go"
         required
         invalid={error !== undefined}

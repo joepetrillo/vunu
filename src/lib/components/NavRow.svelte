@@ -22,8 +22,10 @@
 
 <!-- One row of a ListGroup that opens another screen: the whole row is the
      link, with a chevron to say so. -->
+<!-- A long-press shouldn't select the row's words or open iOS's link
+     preview: the row is a control, like a native list row. -->
 <li>
-  <Item.Root class="rounded-none">
+  <Item.Root class="rounded-none select-none [-webkit-touch-callout:none]">
     {#snippet child({ props })}
       <a {href} {...props}>
         {#if media}
