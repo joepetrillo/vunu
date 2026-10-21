@@ -182,8 +182,6 @@ export function swipe(options: Options): Attachment<HTMLElement> {
           return;
         }
         tracking = true;
-        // Measured from here, so the card doesn't jump the dead zone.
-        startX = event.clientX;
         // Keeps the moves coming even when the finger leaves the card.
         card.setPointerCapture(event.pointerId);
       }
