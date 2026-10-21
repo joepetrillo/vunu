@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { MAX_CODES_PER_EMAIL } from "#lib/server/sign-in-code-limit.ts";
 import { connectTestDb } from "#lib/server/testing/db.ts";
 import { deleteAccount, readSignInCode } from "#lib/server/testing/sign-in.ts";
+import { visit } from "#lib/server/testing/visit.ts";
 
 const { pool, db } = connectTestDb();
 
@@ -47,7 +48,7 @@ test("keeps the email fixed during a send and focuses the code input", async ({
     },
     { times: 1 }
   );
-  await page.goto("/sign-in");
+  await visit(page, "/sign-in");
   await page.getByLabel("Email").fill(freshEmail());
   await page.getByRole("button", { name: "Email me a code" }).click();
   try {
@@ -62,7 +63,7 @@ test("keeps the email fixed during a send and focuses the code input", async ({
 test("prevents switching email during a resend and restores focus afterwards", async ({
   page,
 }) => {
-  await page.goto("/sign-in");
+  await visit(page, "/sign-in");
   await page.getByLabel("Email").fill(freshEmail());
   await page.getByRole("button", { name: "Email me a code" }).click();
   await expect(page.getByLabel("Code")).toBeVisible();
@@ -101,7 +102,7 @@ test("recovers after the send request can't reach the server", async ({
     (route) => route.abort(),
     { times: 1 }
   );
-  await page.goto("/sign-in");
+  await visit(page, "/sign-in");
   await page.getByLabel("Email").fill(freshEmail());
   await page.getByRole("button", { name: "Email me a code" }).click();
   await expect(page.getByRole("alert")).toHaveText(/Couldn't reach/);
@@ -140,7 +141,7 @@ test("signed-out visitors are sent to sign-in", async ({ page }) => {
 test("signs in with an emailed code and returns to the requested page", async ({
   page,
 }) => {
-  await page.goto("/seen");
+  await visit(page, "/seen");
 
   await page.getByLabel("Email").fill(email);
   await page.getByRole("button", { name: "Email me a code" }).click();
@@ -159,7 +160,7 @@ test("signs in with an emailed code and returns to the requested page", async ({
   await expect(page).toHaveURL("/seen");
 
   // Signing out ends the session: protected pages redirect again.
-  await page.goto("/");
+  await visit(page, "/");
   await expect(page.getByText(email)).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL("/sign-in");
@@ -170,7 +171,7 @@ test("signs in with an emailed code and returns to the requested page", async ({
 test("refuses more codes for one email within the limit window", async ({
   page,
 }) => {
-  await page.goto("/sign-in");
+  await visit(page, "/sign-in");
   await page.getByLabel("Email").fill(limitedEmail);
   const sendCode = page.getByRole("button", { name: "Email me a code" });
 

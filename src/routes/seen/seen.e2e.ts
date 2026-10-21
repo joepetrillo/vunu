@@ -9,6 +9,7 @@ import {
   testMovieId,
 } from "#lib/server/testing/db.ts";
 import { deleteAccount, signIn } from "#lib/server/testing/sign-in.ts";
+import { appStarted, visit } from "#lib/server/testing/visit.ts";
 
 const { pool, db } = connectTestDb();
 const fixtures = createFixtures(db);
@@ -43,7 +44,7 @@ async function signInAsNewUser(page: Page): Promise<string> {
 }
 
 async function searchAllMovies(page: Page): Promise<void> {
-  await page.goto("/seen?scope=all");
+  await visit(page, "/seen?scope=all");
   await page.getByRole("searchbox", { name: "Title" }).fill(runId);
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page).toHaveURL(`/seen?scope=all&title=${runId}`);
@@ -61,6 +62,7 @@ test("adds a movie to the seen list and removes it", async ({ page }) => {
   // Saved, and the search is still there.
   await expect(row.getByText("1999 · Seen")).toBeVisible();
   await page.reload();
+  await appStarted(page);
   await expect(row.getByText("1999 · Seen")).toBeVisible();
   await expect(page.getByRole("searchbox", { name: "Title" })).toHaveValue(
     runId
@@ -220,11 +222,11 @@ test("doesn't let a stale action parameter override the next change", async ({
   page,
 }) => {
   await signInAsNewUser(page);
-  await page.goto(`/seen?scope=all&title=${runId}&/remove`);
+  await visit(page, `/seen?scope=all&title=${runId}&/remove`);
   const row = page.getByRole("listitem").filter({ hasText: title });
   await row.getByRole("button", { name: `Seen it: ${title}` }).click();
   await expect(row.getByText("1999 · Seen")).toBeVisible();
-  await page.goto(`/seen?scope=all&title=${runId}&/add`);
+  await visit(page, `/seen?scope=all&title=${runId}&/add`);
   await row.getByRole("button", { name: `Remove ${title}` }).click();
   await expect(
     row.getByRole("button", { name: `Seen it: ${title}` })

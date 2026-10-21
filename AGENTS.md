@@ -67,6 +67,7 @@ Package manager is **bun**. Command list and setup: README "Commands" and "Safe 
 
 - `bun run verify` = frozen install + lint + svelte-check + Vitest (`--run`; Vitest defaults to watch mode). The pre-commit hook runs `bun run lint`.
 - Database tests and e2e need a disposable `TEST_DATABASE_URL` exported in the shell. They never fall back to `DATABASE_URL` or read `.env.local`. Apply migrations to it with `bun run db:migrate:test`, never `db:migrate`.
+- E2E tests load a page they'll tap on with `visit()` (`#lib/server/testing/visit.ts`): it waits for the root layout's `started` mark on `<body>`, since a tap before the app's code runs is lost; after a `reload()` they tap on, call `appStarted()`. Use `page.goto` only to see a page before its code runs, or when only reading it.
 
 Env files (why: spec section 5b):
 

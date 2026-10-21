@@ -4,6 +4,7 @@ import { expect, test } from "@playwright/test";
 
 import { connectTestDb } from "#lib/server/testing/db.ts";
 import { deleteAccount, signIn } from "#lib/server/testing/sign-in.ts";
+import { visit } from "#lib/server/testing/visit.ts";
 
 const { pool, db } = connectTestDb();
 const email = `e2e-theme-${crypto.randomUUID()}@example.test`;
@@ -71,7 +72,7 @@ test("the appearance pick follows the device, sticks, and paints first", async (
 
   // A pick in another tab reaches this one.
   const other = await page.context().newPage();
-  await other.goto("/");
+  await visit(other, "/");
   await other.getByRole("radio", { name: "System" }).click();
   await expect(html).not.toHaveClass(/dark/);
   await expect(page.getByText("Same as this device")).toBeVisible();
