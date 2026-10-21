@@ -12,7 +12,7 @@
   import * as DropdownMenu from "#lib/components/ui/dropdown-menu/index.ts";
   import * as Item from "#lib/components/ui/item/index.ts";
   import type { MovieCard } from "#lib/deck-fields.ts";
-  import { listNames } from "#lib/format.ts";
+  import { formatCount, listNames } from "#lib/format.ts";
 
   import type { PageProps } from "./$types";
 
@@ -120,7 +120,11 @@
   {/if}
 
   {#if data.matches.length > 0}
-    <section aria-label={`${String(data.matches.length)} matches`}>
+    <section
+      aria-label={data.matches.length === 1
+        ? "1 match"
+        : `${formatCount(data.matches.length)} matches`}
+    >
       <MatchList matches={data.matches} actions={rowMenu} />
     </section>
   {/if}

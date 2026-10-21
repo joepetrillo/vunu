@@ -112,7 +112,7 @@
     {#each boxes as char, position (position)}
       <div
         class={cn(
-          "relative flex h-14 flex-1 items-center justify-center border-y border-r border-input bg-input/30 font-mono text-2xl transition-all first:rounded-l-4xl first:border-l last:rounded-r-4xl",
+          "relative flex h-14 flex-1 items-center justify-center border-y border-r border-input bg-input/30 font-mono text-2xl transition-[border-color,box-shadow] first:rounded-l-4xl first:border-l last:rounded-r-4xl",
           invalid && "border-destructive"
         )}
       >

@@ -34,9 +34,11 @@
     <Field.Group>
       <PreferenceFields genres={data.genres} initial={data.preferences} />
     </Field.Group>
-    <!-- Stays in reach while the fields scroll under it. -->
+    <!-- Stays in reach while the fields scroll under it. Its margins undo
+         Page's padding (safe areas included) so its background reaches the
+         screen's edges. -->
     <div
-      class="sticky bottom-0 -mx-5 mt-8 flex flex-col gap-3 bg-background px-5 pt-3 pb-[max(env(safe-area-inset-bottom),1rem)]"
+      class="sticky bottom-0 mt-8 -mr-[max(env(safe-area-inset-right),1.25rem)] -ml-[max(env(safe-area-inset-left),1.25rem)] flex flex-col gap-3 bg-background pt-3 pr-[max(env(safe-area-inset-right),1.25rem)] pb-[max(env(safe-area-inset-bottom),1rem)] pl-[max(env(safe-area-inset-left),1.25rem)]"
     >
       <Button type="submit" size="lg">Show movies</Button>
       <Button variant="ghost" href={deckHref}>Anything is fine</Button>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { refreshAll } from "$app/navigation";
-  import { tick } from "svelte";
+  import type { Attachment } from "svelte/attachments";
 
   import { authClient } from "#lib/auth-client.ts";
   import CodeInput from "#lib/components/CodeInput.svelte";
@@ -25,6 +25,14 @@
   let errorMessage = $state<string | null>(null);
   // Confirms a re-sent code, which would otherwise look like nothing happened.
   let resent = $state(false);
+  // Back on the email step from the code step, so its field takes focus.
+  let returning = $state(false);
+
+  // Each step's form replaces the other's, so its field takes focus as it
+  // appears. An attachment runs once its element is on the page.
+  const focusOnMount: Attachment<HTMLElement> = (element) => {
+    element.focus();
+  };
 
   // Better Auth's messages are terse ("Invalid OTP"); these say what to do next.
   function describeError(error: AuthError): string {
@@ -69,12 +77,7 @@
   async function submitEmail(event: SubmitEvent) {
     // The browser would otherwise submit the form as a full page request.
     event.preventDefault();
-    if (await requestCode()) {
-      step = "code";
-      // The old form is removed. Focus the replacement after Svelte renders it.
-      await tick();
-      document.querySelector<HTMLInputElement>('input[name="code"]')?.focus();
-    }
+    if (await requestCode()) step = "code";
   }
 
   async function resendCode() {
@@ -105,14 +108,13 @@
     }
   }
 
-  async function useDifferentEmail() {
+  function useDifferentEmail() {
     if (pending !== null) return;
     step = "email";
     code = "";
     errorMessage = null;
     resent = false;
-    await tick();
-    document.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+    returning = true;
   }
 </script>
 
@@ -141,6 +143,7 @@
             required
             disabled={pending !== null}
             bind:value={email}
+            {@attach returning && focusOnMount}
           />
         </Field.Field>
         <Button type="submit" size="lg" disabled={pending !== null}>
@@ -150,8 +153,8 @@
     </form>
   {:else}
     <p class="mb-6 text-balance">
-      We sent a 6-digit code to <strong class="break-all">{email}</strong>. It
-      expires in 5 minutes.
+      We sent a 6-digit code to <strong class="wrap-anywhere">{email}</strong>.
+      It expires in 5 minutes.
     </p>
     <form method="POST" onsubmit={submitCode}>
       <Field.Group>
@@ -168,6 +171,7 @@
             required
             disabled={pending !== null}
             bind:value={code}
+            {@attach focusOnMount}
           />
         </Field.Field>
         <Button type="submit" size="lg" disabled={pending !== null}>

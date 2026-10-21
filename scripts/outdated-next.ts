@@ -1,5 +1,5 @@
 /**
- * Checks our pinned pre-release packages (currently Drizzle `1.0.0-rc.4`)
+ * Checks our pinned pre-release packages (currently Drizzle `1.0.0-rc.5`)
  * against npm. `bun outdated` can't do this: it compares against each package's
  * `latest` tag, which still points at the old stable version while a new major
  * is in pre-release.
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
       : {}),
   };
 
-  // Anything pinned to an exact pre-release version, like "1.0.0-rc.4".
+  // Anything pinned to an exact pre-release version, like "1.0.0-rc.5".
   const pinned = Object.entries(deps).filter(
     (entry): entry is [string, string] =>
       typeof entry[1] === "string" && /^\d+\.\d+\.\d+-/.test(entry[1])
