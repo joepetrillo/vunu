@@ -4,7 +4,7 @@ import { EASE_OUT_STRONG_CSS } from "#lib/motion.ts";
 
 import type { Answer } from "./deck.svelte.ts";
 
-// Swiping the deck's card: left for Seen, right for Not seen, the same sides
+// Swiping the deck's card: left for Not seen, right for Seen, the same sides
 // as the buttons. The buttons stay; this is an extra (spec section 1).
 
 /** A drag past this share of the card's width answers when let go. */
@@ -108,9 +108,9 @@ export function swipe(options: Options): Attachment<HTMLElement> {
           : `translateX(${String(x)}px) rotate(${String(tiltFor(x, width))}deg)`;
       // The label fades in as the drag nears the point where it answers.
       const progress = Math.min(Math.abs(x) / (width * COMMIT_SHARE), 1);
-      if (labels.seen) labels.seen.style.opacity = String(x < 0 ? progress : 0);
+      if (labels.seen) labels.seen.style.opacity = String(x > 0 ? progress : 0);
       if (labels.notSeen) {
-        labels.notSeen.style.opacity = String(x > 0 ? progress : 0);
+        labels.notSeen.style.opacity = String(x < 0 ? progress : 0);
       }
     }
 
@@ -205,7 +205,7 @@ export function swipe(options: Options): Attachment<HTMLElement> {
       const width = card.offsetWidth;
       if (commits(x, velocity, width) && options.enabled()) {
         releases.set(card, { x, tilt: tiltFor(x, width), velocity });
-        options.onAnswer(x < 0 ? "seen" : "not_seen");
+        options.onAnswer(x > 0 ? "seen" : "not_seen");
         return;
       }
       settle();

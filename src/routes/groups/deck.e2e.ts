@@ -309,7 +309,7 @@ test("swipes answer like the buttons, and a short drag springs back", async ({
   await drag(page, 40, { pause: 200 });
   await expect(card(page)).toHaveText(title(comedy, 0));
 
-  // Left is Seen, right is Not seen, the same sides as the buttons.
+  // Left is Not seen, right is Seen, the same sides as the buttons.
   await drag(page, -250);
   await expect(card(page)).toHaveText(title(comedy, 1));
   await drag(page, 250);
@@ -320,7 +320,7 @@ test("swipes answer like the buttons, and a short drag springs back", async ({
     .select({ movieId: seenMovies.movieId })
     .from(seenMovies)
     .where(eq(seenMovies.userId, await userId(email)));
-  expect(seen.map((row) => row.movieId)).toEqual([comedy.movies[0]?.id]);
+  expect(seen.map((row) => row.movieId)).toEqual([comedy.movies[1]?.id]);
 });
 
 test("a save that loses its response is retried once, not twice", async ({

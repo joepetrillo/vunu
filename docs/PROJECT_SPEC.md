@@ -37,7 +37,7 @@ Stages 6–7 built **watch sessions** (a host, who's watching, End session); sta
 
 ### Answering
 
-1. The deck deals one movie at a time, with two big buttons: **Seen** / **Not seen**, plus Undo. The card can also be swiped (added 2026-10-21): left for Seen, right for Not seen, the same sides as the buttons, with the answer's word fading in as you drag. The buttons stay, so a swipe is never the only input. No hearts, crosses, or like/dislike styling.
+1. The deck deals one movie at a time, with two big buttons: **Not seen** (left) / **Seen** (right), plus Undo. The card can also be swiped (added 2026-10-21): left for Not seen, right for Seen, the same sides as the buttons (switched the same day to match the dating-app habit people bring), with the answer's word fading in as you drag. The buttons stay, so a swipe is never the only input. No hearts, crosses, or like/dislike styling.
    - **Seen** adds the movie to your seen list. It's gone from everyone's deck and can never match in any of your groups. Others see this on their next refresh (a few seconds).
    - **Not seen** is remembered for 2 weeks (see above).
 2. A movie is a **match** for a group when **every current member** has a Not seen for it from the last 2 weeks, nobody in the group has it on their seen list, and the group hasn't marked it watched. Matches are derived from answers only, never stored; preferences and catalog data decide only what gets dealt, so a catalog sync can't break a match.

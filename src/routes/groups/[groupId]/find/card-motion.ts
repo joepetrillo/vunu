@@ -12,9 +12,9 @@ import { releaseOf } from "./swipe.ts";
 /** How far a card travels sideways as it leaves or comes back. */
 const TRAVEL = 360;
 
-/** Seen leaves to the left, Not seen to the right, like the buttons. */
+/** Not seen leaves to the left, Seen to the right, like the buttons. */
 function sideOf(answer: Answer): number {
-  return answer === "seen" ? -1 : 1;
+  return answer === "seen" ? 1 : -1;
 }
 
 interface LeaveOptions {

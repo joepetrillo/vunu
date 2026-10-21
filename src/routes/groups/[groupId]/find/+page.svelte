@@ -278,7 +278,7 @@
             <!-- Fade in while the card is dragged toward an answer (the
                  swipe sets their opacity). Words only: Vunu asks what
                  you've seen, not what you like. -->
-            {#each [{ answer: "seen", label: "Seen", side: "right-4" }, { answer: "not_seen", label: "Not seen", side: "left-4" }] as const as hint (hint.answer)}
+            {#each [{ answer: "seen", label: "Seen", side: "left-4" }, { answer: "not_seen", label: "Not seen", side: "right-4" }] as const as hint (hint.answer)}
               <span
                 data-swipe-label={hint.answer}
                 aria-hidden="true"
@@ -382,9 +382,11 @@
       {/if}
     </div>
 
-    <!-- Two equal buttons: Vunu asks what you've seen, not what you like. -->
+    <!-- Two equal buttons: Vunu asks what you've seen, not what you like.
+         Not seen on the left, Seen on the right, like the swipe (and the
+         dating-app habit people bring: right keeps it moving). -->
     <div class="grid grid-cols-2 gap-3">
-      {#each [{ answer: "seen", label: "Seen" }, { answer: "not_seen", label: "Not seen" }] as const as choice (choice.answer)}
+      {#each [{ answer: "not_seen", label: "Not seen" }, { answer: "seen", label: "Seen" }] as const as choice (choice.answer)}
         <Button
           variant="secondary"
           class="h-16 text-lg"
