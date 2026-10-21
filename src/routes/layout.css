@@ -118,6 +118,46 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Motion curves, as ease-out-strong and ease-sheet utilities. Tailwind's
+     own ease-out is too gentle: motion with it feels flat. */
+  /* Fast start, long settle: presses, the deck's cards, small entrances. */
+  --ease-out-strong: cubic-bezier(0.22, 1, 0.36, 1);
+  /* An edge-attached sheet: an even steeper start (Vaul's iOS sheet curve). */
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Motion durations, used as duration-(--duration-card) and so on. Svelte
+   transitions can't read CSS, so #lib/motion.ts repeats the ones they use. */
+:root {
+  --duration-press: 150ms;
+  --duration-card: 200ms;
+  --duration-sheet-in: 300ms;
+  --duration-sheet-out: 200ms;
+}
+
+/* With less motion asked for, sheets, dialogs and menus fade in place
+   instead of sliding or growing. Outside any layer, so it beats the
+   tw-animate utilities that set these. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="dropdown-menu-content"] {
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+    --tw-enter-scale: 1;
+    --tw-exit-scale: 1;
+    --tw-enter-opacity: 0;
+    --tw-exit-opacity: 0;
+  }
+}
+
+/* The deck owns every touch on its screen: without this, iOS bounces the
+   page and a pull from the top can reload it mid-save. Only the deck: list
+   pages keep their native bounce. */
+html:has([data-deck]) {
+  overscroll-behavior: none;
 }
 
 @layer base {
@@ -151,9 +191,14 @@
   html.dark {
     color-scheme: dark;
   }
-  /* Fires taps immediately instead of waiting to see if it's a double-tap zoom. */
+  /* Fires taps immediately instead of waiting to see if it's a double-tap
+     zoom. Labels too: the preference chips are labels, and tapping one twice
+     quickly would otherwise zoom the page on iOS. */
   a,
   button,
+  label,
+  select,
+  summary,
   [role="button"] {
     touch-action: manipulation;
   }
