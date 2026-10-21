@@ -1,4 +1,5 @@
 import { type ActionResult, deserialize } from "$app/forms";
+import { SvelteMap } from "svelte/reactivity";
 
 import {
   type DeckState,
@@ -70,8 +71,6 @@ export class Deck {
   refused = $state<string | null>(null);
   /** Turns on when matches reach REVIEW_PROMPT_AT during this visit. */
   reviewPrompt = $state(false);
-  /** The latest answer, so the card can leave in that answer's direction. */
-  lastAnswer = $state<Answer>("not_seen");
   /**
    * With nothing left for you to answer: who your matches wait on. Empty
    * means nobody (your preferences used up the pool); null, not known yet.
@@ -92,6 +91,11 @@ export class Deck {
   #undoId: string | null = null;
   #fingerprint: string;
   #updates: DeckSubscription | null = null;
+  // For the cards' motion, read as a card comes or goes (card-motion.ts):
+  // what each card answered on this visit was, so it leaves (and comes back
+  // on Undo) on its answer's side, and the card Undo just brought back.
+  #answered = new SvelteMap<number, Answer>();
+  #undone: { id: number; answer: Answer | undefined } | null = null;
 
   constructor(state: DeckState, preferences: string) {
     this.#preferences = preferences;
@@ -133,6 +137,16 @@ export class Deck {
     return this.cards[0];
   }
 
+  /** The answer that took this card off the deck, if one did on this visit. */
+  answeredAs(cardId: number): Answer | undefined {
+    return this.#answered.get(cardId);
+  }
+
+  /** Set when Undo brought this card back, with the answer it had. */
+  undoneAs(cardId: number): { answer: Answer | undefined } | undefined {
+    return this.#undone?.id === cardId ? this.#undone : undefined;
+  }
+
   get canUndo(): boolean {
     return this.#serverCanUndo || this.pending > 0;
   }
@@ -145,7 +159,7 @@ export class Deck {
   answer(answer: Answer): void {
     const card = this.cards[0];
     if (card === undefined || this.undoing || this.refused !== null) return;
-    this.lastAnswer = answer;
+    this.#answered.set(card.id, answer);
     this.cards = this.cards.slice(1);
     this.#saves.push({ actionId: crypto.randomUUID(), card, answer });
     this.pending = this.#saves.length;
@@ -295,7 +309,11 @@ export class Deck {
     this.#serverCanUndo = canUndo;
   }
 
+  // Undo's card goes back on top. It's no longer answered, so if it later
+  // drops behind and a refresh replaces it, it fades instead of flying off.
   #showFirst(card: MovieCard): void {
+    this.#undone = { id: card.id, answer: this.#answered.get(card.id) };
+    this.#answered.delete(card.id);
     this.cards = [card, ...this.cards.filter((other) => other.id !== card.id)];
   }
 

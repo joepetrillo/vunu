@@ -152,7 +152,7 @@ function answer(page: Page, choice: "Seen" | "Not seen") {
 
 function matchRows(page: Page) {
   return page
-    .getByRole("region", { name: /^\d+ matches$/ })
+    .getByRole("region", { name: /^[\d,]+ match(es)?$/ })
     .getByRole("listitem");
 }
 
@@ -276,6 +276,51 @@ test("answers alone with undo and a correction", async ({ page }) => {
   expect(seen.map((row) => row.movieId).sort()).toEqual(
     [comedy.movies[0]?.id, comedy.movies[1]?.id].sort()
   );
+});
+
+/** Drags the card on screen sideways by `dx` px with the mouse. */
+async function drag(page: Page, dx: number, { pause = 0 } = {}) {
+  // The card on screen; wait out an earlier card still flying off.
+  const top = page.locator("[data-deck] [aria-hidden='false']");
+  await expect(top).toHaveCount(1);
+  const box = await top.boundingBox();
+  if (box === null) throw new Error("No card on screen.");
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + dx, y, { steps: 10 });
+  // Holding still before letting go: the release has no speed left.
+  if (pause > 0) await page.waitForTimeout(pause);
+  await page.mouse.up();
+}
+
+test("swipes answer like the buttons, and a short drag springs back", async ({
+  page,
+}) => {
+  const email = `${runId}-${String(emails.length)}@example.test`;
+  emails.push(email);
+  await signIn(page, db, email);
+  await createGroup(page, "Me");
+  await findMovie(page, comedy);
+
+  // A short, slow drag doesn't answer.
+  await expect(card(page)).toHaveText(title(comedy, 0));
+  await drag(page, 40, { pause: 200 });
+  await expect(card(page)).toHaveText(title(comedy, 0));
+
+  // Left is Seen, right is Not seen, the same sides as the buttons.
+  await drag(page, -250);
+  await expect(card(page)).toHaveText(title(comedy, 1));
+  await drag(page, 250);
+  await expect(card(page)).toHaveText(title(comedy, 2));
+  await expect(page.getByRole("link", { name: "Matches 1" })).toBeVisible();
+
+  const seen = await db
+    .select({ movieId: seenMovies.movieId })
+    .from(seenMovies)
+    .where(eq(seenMovies.userId, await userId(email)));
+  expect(seen.map((row) => row.movieId)).toEqual([comedy.movies[0]?.id]);
 });
 
 test("a save that loses its response is retried once, not twice", async ({

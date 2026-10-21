@@ -11,7 +11,7 @@
   import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
   import Undo2Icon from "@lucide/svelte/icons/undo-2";
   import { prefersReducedMotion } from "svelte/motion";
-  import { fly } from "svelte/transition";
+  import { fade, scale } from "svelte/transition";
 
   import MoviePoster from "#lib/components/MoviePoster.svelte";
   import PreferenceFields from "#lib/components/PreferenceFields.svelte";
@@ -30,9 +30,12 @@
   } from "#lib/deck-fields.ts";
   import { dropEmptyFields } from "#lib/drop-empty-fields.ts";
   import { formatCount, listNames } from "#lib/format.ts";
+  import { CARD_MS, easeOutStrong, FADE_MS } from "#lib/motion.ts";
 
   import type { PageProps } from "./$types";
+  import { cardArrive, cardLeave } from "./card-motion.ts";
   import { Deck } from "./deck.svelte.ts";
+  import { swipe } from "./swipe.ts";
 
   let { data }: PageProps = $props();
 
@@ -92,14 +95,46 @@
     });
   });
 
-  // The leaving card flies toward the side of its answer. Skipped for
-  // people who ask their device for less motion.
-  function leave(node: Element) {
-    return fly(node, {
-      x: deck.lastAnswer === "seen" ? -360 : 360,
-      duration: prefersReducedMotion.current ? 0 : 260,
+  // Whether the card on screen can be answered, by button or by swipe.
+  let answerable = $derived(
+    deck.card !== undefined &&
+      !deck.undoing &&
+      !deck.reviewPrompt &&
+      deck.refused === null
+  );
+
+  // The cards' motion (card-motion.ts) asks the deck how each card left or
+  // came back: only an answered card flies off, toward its answer's side,
+  // and Undo brings it back from there. Less motion: fades only.
+  function leave(node: HTMLElement, cardId: number) {
+    return cardLeave(node, {
+      answer: deck.answeredAs(cardId),
+      reducedMotion: prefersReducedMotion.current,
     });
   }
+  function arrive(node: HTMLElement, cardId: number) {
+    return cardArrive(node, {
+      undone: deck.undoneAs(cardId),
+      reducedMotion: prefersReducedMotion.current,
+    });
+  }
+
+  // The 5-match prompt takes the card's place: it grows in slightly, so the
+  // swap reads as a new step rather than a glitch.
+  function appear(node: HTMLElement) {
+    return prefersReducedMotion.current
+      ? fade(node, { duration: FADE_MS })
+      : scale(node, { start: 0.96, duration: CARD_MS, easing: easeOutStrong });
+  }
+
+  // Swiping the card on screen answers it, exactly like its button.
+  const swipeCard = swipe({
+    enabled: () => answerable,
+    reducedMotion: () => prefersReducedMotion.current,
+    onAnswer: (answer) => {
+      deck.answer(answer);
+    },
+  });
 </script>
 
 <svelte:head><title>Find a movie · Vunu</title></svelte:head>
@@ -110,6 +145,7 @@
 <!-- No link preloading: matches change with every answer, and data
        fetched when a link is touched could be stale by the time it opens. -->
 <div
+  data-deck
   data-sveltekit-preload-data="off"
   class="mx-auto flex h-dvh w-full max-w-md flex-col pt-[max(env(safe-area-inset-top),1.5rem)] pr-[max(env(safe-area-inset-right),1.25rem)] pb-[max(env(safe-area-inset-bottom),1rem)] pl-[max(env(safe-area-inset-left),1.25rem)]"
 >
@@ -135,7 +171,7 @@
        them in full. -->
   <Sheet.Root bind:open={moodOpen}>
     <Sheet.Trigger
-      class="mt-3 flex h-12 w-full items-center gap-3 rounded-2xl border px-4 text-left transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      class="mt-3 flex h-12 w-full items-center gap-3 rounded-2xl border px-4 text-left transition-colors outline-none select-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:bg-muted"
     >
       <SlidersHorizontalIcon class="size-5 shrink-0" />
       <span class="min-w-0 flex-1 truncate font-medium">In the mood for</span>
@@ -164,7 +200,11 @@
         onformdata={dropEmptyFields}
         class="flex min-h-0 flex-1 flex-col"
       >
-        <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-2">
+        <!-- overscroll-contain: scrolling past either end stops here
+             instead of moving the page behind the sheet. -->
+        <div
+          class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-2"
+        >
           <Field.Group>
             <PreferenceFields genres={data.genres} initial={data.preferences} />
           </Field.Group>
@@ -186,33 +226,47 @@
         <Button class="mt-4" onclick={() => refreshAll()}>Reload</Button>
       </div>
     {:else if deck.reviewPrompt}
-      <Card.Root class="w-full">
-        <Card.Header>
-          <Card.Title>{REVIEW_PROMPT_AT} movies nobody has seen</Card.Title>
-          <Card.Description>
-            Take a look and pick one, or keep going to find more.
-          </Card.Description>
-        </Card.Header>
-        <Card.Footer class="flex flex-col items-stretch gap-3">
-          <Button size="lg" href={matchesHref}>See the matches</Button>
-          <Button variant="ghost" onclick={() => (deck.reviewPrompt = false)}>
-            Keep going
-          </Button>
-        </Card.Footer>
-      </Card.Root>
+      <div class="w-full" in:appear>
+        <Card.Root class="w-full">
+          <Card.Header>
+            <Card.Title>{REVIEW_PROMPT_AT} movies nobody has seen</Card.Title>
+            <Card.Description>
+              Take a look and pick one, or keep going to find more.
+            </Card.Description>
+          </Card.Header>
+          <Card.Footer class="flex flex-col items-stretch gap-3">
+            <Button size="lg" href={matchesHref}>See the matches</Button>
+            <Button variant="ghost" onclick={() => (deck.reviewPrompt = false)}>
+              Keep going
+            </Button>
+          </Card.Footer>
+        </Card.Root>
+      </div>
     {:else if deck.card !== undefined}
       <!-- The visible card with the next one behind it, slightly smaller,
-             so its poster is already loaded when it moves up. -->
-      <div class="relative aspect-2/3 h-full max-h-full max-w-full">
+             so its poster is already loaded when it moves up. Fades in when
+             the deck comes back (Keep going, more movies dealt). -->
+      <div
+        class="relative aspect-2/3 h-full max-h-full max-w-full"
+        in:fade={{ duration: FADE_MS }}
+      >
         {#each deck.cards.slice(0, 2).reverse() as card (card.id)}
           {@const isTop = card.id === deck.card.id}
+          <!-- Tailwind 4's translate-* and scale-* set the translate and
+               scale properties, so those are what moving up transitions.
+               The card is a control, not content: no text selection or
+               iOS long-press image menu (the poster ignores touches).
+               touch-pan-y: sideways drags are the swipe's, while up and
+               down still scroll the page. -->
           <div
             class={[
-              "absolute inset-0 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none",
+              "absolute inset-0 touch-pan-y transition-[translate,scale,opacity] duration-(--duration-card) ease-out-strong select-none [-webkit-touch-callout:none] motion-reduce:transition-opacity [&_img]:pointer-events-none",
               isTop ? "z-10" : "translate-y-3 scale-[0.94] opacity-60",
             ]}
             aria-hidden={!isTop}
-            out:leave
+            in:arrive={card.id}
+            out:leave={card.id}
+            {@attach isTop && swipeCard}
           >
             <MoviePoster
               posterPath={card.posterPath}
@@ -221,6 +275,21 @@
               loading="eager"
               class="h-full rounded-3xl shadow-xl"
             />
+            <!-- Fade in while the card is dragged toward an answer (the
+                 swipe sets their opacity). Words only: Vunu asks what
+                 you've seen, not what you like. -->
+            {#each [{ answer: "seen", label: "Seen", side: "right-4" }, { answer: "not_seen", label: "Not seen", side: "left-4" }] as const as hint (hint.answer)}
+              <span
+                data-swipe-label={hint.answer}
+                aria-hidden="true"
+                class={[
+                  "pointer-events-none absolute top-4 rounded-full bg-background/90 px-4 py-2 text-lg font-semibold text-foreground opacity-0 shadow-lg",
+                  hint.side,
+                ]}
+              >
+                {hint.label}
+              </span>
+            {/each}
           </div>
         {/each}
       </div>
@@ -319,10 +388,7 @@
         <Button
           variant="secondary"
           class="h-16 text-lg"
-          disabled={deck.card === undefined ||
-            deck.undoing ||
-            deck.reviewPrompt ||
-            deck.refused !== null}
+          disabled={!answerable}
           onclick={() => {
             deck.answer(choice.answer);
           }}
