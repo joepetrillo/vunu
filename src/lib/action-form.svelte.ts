@@ -84,7 +84,12 @@ export class ActionForm {
         try {
           await update({ reset: false });
         } catch {
-          this.error = "Saved, but couldn't refresh. Reload the page.";
+          // A redirect's page (often sign-in) failed to open; it may not
+          // mean anything was saved, so it doesn't say so.
+          this.error =
+            result.type === "success"
+              ? "Saved, but couldn't refresh. Reload the page."
+              : "Couldn't open the page. Reload to continue.";
         }
       } finally {
         this.saving = false;

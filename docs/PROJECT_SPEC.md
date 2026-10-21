@@ -37,7 +37,7 @@ Stages 6–7 built **watch sessions** (a host, who's watching, End session); sta
 
 ### Answering
 
-1. The deck deals one movie at a time, with two big buttons: **Seen** / **Not seen**, plus Undo. Swipe gestures are an optional extra, never the only input. No hearts, crosses, or like/dislike styling.
+1. The deck deals one movie at a time, with two big buttons: **Seen** / **Not seen**, plus Undo. The card can also be swiped (added 2026-10-21): left for Seen, right for Not seen, the same sides as the buttons, with the answer's word fading in as you drag. The buttons stay, so a swipe is never the only input. No hearts, crosses, or like/dislike styling.
    - **Seen** adds the movie to your seen list. It's gone from everyone's deck and can never match in any of your groups. Others see this on their next refresh (a few seconds).
    - **Not seen** is remembered for 2 weeks (see above).
 2. A movie is a **match** for a group when **every current member** has a Not seen for it from the last 2 weeks, nobody in the group has it on their seen list, and the group hasn't marked it watched. Matches are derived from answers only, never stored; preferences and catalog data decide only what gets dealt, so a catalog sync can't break a match.
@@ -207,6 +207,8 @@ Not needed for v1: WebSockets or real-time services, Redis, job queues (BullMQ),
 
 **Scrolling is left to SvelteKit (decided 2026-10-20).** On a reload Kit 3 restores the scroll position only once its JavaScript loads, so a scrolled page paints at the top and then jumps. An inline `app.html` script could restore it before the first paint, but we accept the jump until Kit fixes it (Kit 2 handed reloads to the browser; sveltejs/kit#17244 dropped that).
 
+**Motion (decided 2026-10-21, motion and mobile pass).** Motion only where it tells you something, and never on the way to your goal. What moves: the deck card (only the answered card flies off, toward its answer's side; Undo brings it back from that side; the card behind moves up), the 5-match prompt growing in, sheets sliding the whole way from their edge, and buttons shrinking slightly while pressed. Left still on purpose: page changes, the theme switch (transitions are paused for it), rows leaving a list, and the code field on a wrong code. Durations and curves are tokens in `layout.css`; with reduced motion on, everything fades in place instead of moving. Dragging the preferences sheet down to close it was left out: the library for it (`vaul-svelte`) has only shipped prereleases for Svelte 5, and ✕, a tap outside, or Escape already close it.
+
 ## 7. Build order
 
 Design the schema with the whole spec in mind, but build features in stages. Each stage is a clean stopping point: when its "Done when" checks pass, nothing is half-built and nothing needs remembering.
@@ -256,6 +258,7 @@ Live at [vunu.app](https://vunu.app): email-code sign-in, the seen list, groups 
 - **Stage 9 — done 2026-10-19 ([PR #11](https://github.com/joepetrillo/vunu/pull/11)).** The full catalog sync (section 2). Done when: the full catalog loaded, a cancelled run was resumed by the next, a forced failure sent a Healthchecks alert, and the first scheduled run succeeded. Then the vote floor went to 1,000 ([PR #13](https://github.com/joepetrillo/vunu/pull/13)).
 - **Deck filters and a fresh slate — 2026-10-19 ([PR #12](https://github.com/joepetrillo/vunu/pull/12)).** Animation and age rating; "In the mood for" first, and as a sheet on the deck. A one-time migration (`fresh_slate`) deleted every Not seen and every Watched list, keeping seen lists, groups, and members (owner's call: only family and friends used it). The answer log stays, so a retry sent during the deploy is still recognized; its answers are marked undone, so seen entries from earlier deck answers can't be undone from the deck.
 - **Polish — 2026-10-20 ([PR #14](https://github.com/joepetrillo/vunu/pull/14)–[#16](https://github.com/joepetrillo/vunu/pull/16)).** Lucide icons and the scroll decision (section 6), our own `CodeInput` replacing shadcn's input-otp (AGENTS.md), and e2e tests that wait for the app to start before tapping.
+- **Motion and mobile pass — 2026-10-21.** An audit with the animation, gesture, mobile, worst-case, and Svelte skills, then: the deck's motion fixed (the card behind used to fly off when a refresh replaced it) and Undo's return, swiping the card (section 1), sheets from their edge, press feedback on buttons and list rows, the deck's page no longer bouncing or pulling to refresh, no long-press menus on the card or rows, 16px inputs on every screen size, `SeenButton` on `ActionForm`, and reduced-motion variants for all of it (section 6, Motion). Landscape phones still squeeze the deck's card; left for later.
 
 ### Gotchas
 
@@ -263,6 +266,8 @@ Live at [vunu.app](https://vunu.app): email-code sign-in, the seen list, groups 
 - Svelte: a one-way `open={...}` on `<details>` is re-applied when Svelte updates the form, closing a panel the person opened; use `bind:open`.
 - Kit 3: `SubmitFunction` comes from `$app/forms` (or a route's `./$types`), not `@sveltejs/kit`.
 - eslint-plugin-svelte requires an `href` typed exactly `ResolvedPathname`, so links built with a query string go through `resolve()`.
+- Tailwind 4: `translate-*` and `scale-*` set the separate `translate` and `scale` properties, so `transition-[transform]` doesn't animate them; name `translate` and `scale` instead.
+- Svelte transitions run as Web Animations, so a CSS `prefers-reduced-motion` rule doesn't reach them; they check `prefersReducedMotion` from `svelte/motion`.
 - Chrome adds a space around visually hidden (`sr-only`) text when naming a button ("Seen it : Inception"), so row buttons use `aria-label`.
 - E2E sign-in decrypts the pending code from `verifications` using Better Auth 1.7's identifier and encryption format; recheck it after Better Auth upgrades.
 - The build warns about optional modules (`pg-native`, `cloudflare:sockets`, `bufferutil`, …). Harmless: Vercel's Node runtime never loads them.
