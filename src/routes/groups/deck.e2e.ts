@@ -316,11 +316,18 @@ test("swipes answer like the buttons, and a short drag springs back", async ({
   await expect(card(page)).toHaveText(title(comedy, 2));
   await expect(page.getByRole("link", { name: "Matches 1" })).toBeVisible();
 
-  const seen = await db
-    .select({ movieId: seenMovies.movieId })
-    .from(seenMovies)
-    .where(eq(seenMovies.userId, await userId(email)));
-  expect(seen.map((row) => row.movieId)).toEqual([comedy.movies[1]?.id]);
+  // The Seen is the last answer, so it may still be saving: the match count
+  // above came from the earlier Not seen.
+  const id = await userId(email);
+  await expect
+    .poll(async () => {
+      const seen = await db
+        .select({ movieId: seenMovies.movieId })
+        .from(seenMovies)
+        .where(eq(seenMovies.userId, id));
+      return seen.map((row) => row.movieId);
+    })
+    .toEqual([comedy.movies[1]?.id]);
 });
 
 test("a save that loses its response is retried once, not twice", async ({
