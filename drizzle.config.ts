@@ -30,6 +30,7 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: { url: withVerifiedTls(unpooledUrl) },
+  // No `strict`: it only affects `drizzle-kit push`, which we never use, and
+  // drizzle-kit rc.5 rejects it here.
   verbose: true,
-  strict: true,
 });

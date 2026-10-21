@@ -1,30 +1,159 @@
 {
-  "version": "8",
+  "type": "base",
+  "version": "9",
   "dialect": "postgres",
   "id": "d45c5aab-3964-4dc6-b4b2-6e54c7630df9",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "genres"
+      ],
+      "writes": [
+        "s|tbl|public.genres",
+        "n|tbl|public.genres",
+        "e|tbl|public.genres",
+        "n|rel|public.genres",
+        "n|type|public.genres",
+        "n|rel|public.genres_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "movie_genres"
+      ],
+      "writes": [
+        "s|tbl|public.movie_genres",
+        "n|tbl|public.movie_genres",
+        "e|tbl|public.movie_genres",
+        "n|rel|public.movie_genres",
+        "n|type|public.movie_genres",
+        "n|rel|public.movie_genres_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "movies"
+      ],
+      "writes": [
+        "s|tbl|public.movies",
+        "n|tbl|public.movies",
+        "e|tbl|public.movies",
+        "n|rel|public.movies",
+        "n|type|public.movies",
+        "n|rel|public.movies_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "movie_genres",
+        "movie_genres_genre_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.movie_genres_genre_id_idx",
+        "n|idx|public.movie_genres_genre_id_idx",
+        "e|idx|public.movie_genres_genre_id_idx",
+        "n|rel|public.movie_genres_genre_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.movie_genres",
+        "n|sch|public",
+        "n|col|public.movie_genres.genre_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "movie_genres"
+      ],
+      "writes": [
+        "s|fk|public.movie_genres.movie_genres_movie_id_movies_id_fkey",
+        "n|fk|public.movie_genres.movie_genres_movie_id_movies_id_fkey",
+        "e|fk|public.movie_genres.movie_genres_movie_id_movies_id_fkey",
+        "n|con|public.movie_genres.movie_genres_movie_id_movies_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.movie_genres",
+        "n|sch|public",
+        "n|tbl|public.movies",
+        "n|sch|public",
+        "n|col|public.movie_genres.movie_id",
+        "n|col|public.movies.id",
+        "e|uniqueness|public.movies.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "movie_genres"
+      ],
+      "writes": [
+        "s|fk|public.movie_genres.movie_genres_genre_id_genres_id_fkey",
+        "n|fk|public.movie_genres.movie_genres_genre_id_genres_id_fkey",
+        "e|fk|public.movie_genres.movie_genres_genre_id_genres_id_fkey",
+        "n|con|public.movie_genres.movie_genres_genre_id_genres_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.movie_genres",
+        "n|sch|public",
+        "n|tbl|public.genres",
+        "n|sch|public",
+        "n|col|public.movie_genres.genre_id",
+        "n|col|public.genres.id",
+        "e|uniqueness|public.genres.id"
+      ]
+    }
+  ],
   "ddl": [
     {
-      "isRlsEnabled": false,
+      "schema": "public",
       "name": "genres",
-      "entityType": "tables",
-      "schema": "public"
+      "isRlsEnabled": false,
+      "entityType": "tables"
     },
     {
-      "isRlsEnabled": false,
+      "schema": "public",
       "name": "movie_genres",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
       "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
       "name": "movies",
-      "entityType": "tables",
-      "schema": "public"
+      "isRlsEnabled": false,
+      "entityType": "tables"
     },
     {
+      "schema": "public",
+      "table": "genres",
+      "name": "id",
       "type": "integer",
       "typeSchema": null,
       "notNull": true,
@@ -32,38 +161,25 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "genres"
+      "entityType": "columns"
     },
     {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
+      "schema": "public",
+      "table": "genres",
       "name": "name",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "genres"
-    },
-    {
-      "type": "integer",
+      "type": "text",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "movie_genres",
       "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
       "type": "integer",
       "typeSchema": null,
       "notNull": true,
@@ -71,12 +187,12 @@
       "default": null,
       "generated": null,
       "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "movie_genres",
       "name": "genre_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
       "type": "integer",
       "typeSchema": null,
       "notNull": true,
@@ -84,12 +200,25 @@
       "default": null,
       "generated": null,
       "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "movies",
       "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "title",
       "type": "text",
       "typeSchema": null,
       "notNull": true,
@@ -97,25 +226,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "title",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
-      "type": "date",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
+      "schema": "public",
+      "table": "movies",
       "name": "release_date",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
       "type": "date",
       "typeSchema": null,
       "notNull": false,
@@ -123,12 +239,25 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "us_release_date",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "us_release_date",
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "movies",
+      "name": "runtime",
       "type": "integer",
       "typeSchema": null,
       "notNull": false,
@@ -136,12 +265,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "runtime",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "us_certification",
       "type": "text",
       "typeSchema": null,
       "notNull": false,
@@ -149,12 +278,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "us_certification",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "vote_average",
       "type": "real",
       "typeSchema": null,
       "notNull": false,
@@ -162,12 +291,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "vote_average",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "vote_count",
       "type": "integer",
       "typeSchema": null,
       "notNull": true,
@@ -175,25 +304,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "vote_count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
+      "schema": "public",
+      "table": "movies",
       "name": "poster_path",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
       "type": "text",
       "typeSchema": null,
       "notNull": false,
@@ -201,12 +317,25 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "imdb_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movies",
+      "name": "imdb_id",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "movies",
+      "name": "synced_at",
       "type": "timestamp with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -214,12 +343,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "synced_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "movie_genres",
+      "name": "movie_genres_genre_id_idx",
       "nameExplicit": true,
       "columns": [
         {
@@ -235,12 +364,12 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "movie_genres_genre_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "movie_genres"
+      "entityType": "indexes"
     },
     {
+      "schema": "public",
+      "table": "movie_genres",
+      "name": "movie_genres_movie_id_movies_id_fkey",
       "nameExplicit": false,
       "columns": [
         "movie_id"
@@ -252,12 +381,12 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "movie_genres_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "movie_genres"
+      "entityType": "fks"
     },
     {
+      "schema": "public",
+      "table": "movie_genres",
+      "name": "movie_genres_genre_id_genres_id_fkey",
       "nameExplicit": false,
       "columns": [
         "genre_id"
@@ -269,42 +398,38 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "movie_genres_genre_id_genres_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "movie_genres"
+      "entityType": "fks"
     },
     {
+      "schema": "public",
+      "table": "movie_genres",
+      "name": "movie_genres_pkey",
       "columns": [
         "movie_id",
         "genre_id"
       ],
       "nameExplicit": false,
-      "name": "movie_genres_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "movie_genres"
+      "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
-      "nameExplicit": false,
-      "name": "genres_pkey",
       "schema": "public",
       "table": "genres",
-      "entityType": "pks"
-    },
-    {
+      "name": "genres_pkey",
       "columns": [
         "id"
       ],
       "nameExplicit": false,
-      "name": "movies_pkey",
+      "entityType": "pks"
+    },
+    {
       "schema": "public",
       "table": "movies",
+      "name": "movies_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "entityType": "pks"
     }
-  ],
-  "renames": []
+  ]
 }

@@ -1,2508 +1,1575 @@
 {
-  "version": "8",
+  "type": "diff",
+  "version": "9",
   "dialect": "postgres",
   "id": "4f3d8c74-76aa-4af7-b47e-890d05de0240",
   "prevIds": [
     "6de290b1-4d2f-4ad8-91f4-364023bc80f1"
   ],
-  "ddl": [
+  "footprints": [
     {
-      "values": [
-        "seen_list_add",
-        "seen_list_remove",
-        "group_create",
-        "group_join",
-        "group_leave",
-        "group_rename",
-        "group_delete",
-        "group_reset_invite",
-        "group_remove_member",
-        "group_set_nickname",
-        "watch_session_start",
-        "watch_session_end",
-        "watch_answer_seen",
-        "watch_answer_not_seen",
-        "watch_answer_undo"
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "watch_answer"
       ],
-      "name": "action_type",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "owner",
-        "member"
+      "writes": [
+        "s|enum|public.watch_answer",
+        "n|enum|public.watch_answer",
+        "e|enum|public.watch_answer",
+        "n|type|public.watch_answer"
       ],
-      "name": "group_role",
-      "entityType": "enums",
-      "schema": "public"
+      "reads": [
+        "n|sch|public"
+      ]
     },
     {
-      "values": [
-        "seen",
-        "not_seen"
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "watch_session_role"
       ],
-      "name": "watch_answer",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "host",
-        "guest"
+      "writes": [
+        "s|enum|public.watch_session_role",
+        "n|enum|public.watch_session_role",
+        "e|enum|public.watch_session_role",
+        "n|type|public.watch_session_role"
       ],
-      "name": "watch_session_role",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "accounts",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "actions",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "genres",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "group_members",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "group_past_matches",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "groups",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "invite_lookup_limits",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "movie_genres",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "movies",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "rate_limits",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "seen_movies",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "sessions",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "sign_in_code_limits",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "users",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "verifications",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "watch_session_answers",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "watch_session_participants",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "watch_sessions",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "account_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "provider_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "access_token",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "refresh_token",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id_token",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "access_token_expires_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "refresh_token_expires_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "scope",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "password",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "action_type",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "type",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "group_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "member_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "group_name",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "nickname",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "watch_session_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "participation_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "max_runtime",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "min_year",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "max_year",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 1,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "genre_ids",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "replaced_watch_session_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "undone_by_action_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "genres"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "name",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "genres"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "group_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "type": "group_role",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "role",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "nickname",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "joined_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "group_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_past_matches"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_past_matches"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "recorded_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "group_past_matches"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "groups"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "name",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "groups"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "invite_code",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "groups"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "groups"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invite_lookup_limits"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "window_started_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invite_lookup_limits"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invite_lookup_limits"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "genre_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "title",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "date",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "release_date",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "date",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "us_release_date",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "runtime",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "us_certification",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "real",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "vote_average",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "vote_count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "poster_path",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "imdb_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "synced_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "rate_limits"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "key",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "rate_limits"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "rate_limits"
-    },
-    {
-      "type": "bigint",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "last_request",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "rate_limits"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "last_confirmed_by_action",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "expires_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "token",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "ip_address",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_agent",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "email",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sign_in_code_limits"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "window_started_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sign_in_code_limits"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "sign_in_code_limits"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "name",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "email",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "boolean",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "false",
-      "generated": null,
-      "identity": null,
-      "name": "email_verified",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "image",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "0",
-      "generated": null,
-      "identity": null,
-      "name": "seen_version",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "identifier",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "value",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "expires_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "participation_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "movie_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "type": "watch_answer",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "answer",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "answered_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "gen_random_uuid()",
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "watch_session_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "user_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "watch_session_role",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "role",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "joined_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "removed_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "group_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "max_runtime",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "min_year",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "max_year",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 1,
-      "default": "'{}'",
-      "generated": null,
-      "identity": null,
-      "name": "genre_ids",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "0",
-      "generated": null,
-      "identity": null,
-      "name": "revision",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "last_activity_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "closed_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "alter_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "action_type"
       ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "accounts_user_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "accounts"
+      "writes": [
+        "s|enum|public.action_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
     },
     {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "group_past_matches"
       ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "actions_user_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "actions"
+      "writes": [
+        "s|tbl|public.group_past_matches",
+        "n|tbl|public.group_past_matches",
+        "e|tbl|public.group_past_matches",
+        "n|rel|public.group_past_matches",
+        "n|type|public.group_past_matches",
+        "n|rel|public.group_past_matches_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
     },
     {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "participation_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "created_at",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_answers"
       ],
-      "isUnique": false,
-      "where": "\"participation_id\" is not null",
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "actions_participation_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "actions"
+      "writes": [
+        "s|tbl|public.watch_session_answers",
+        "n|tbl|public.watch_session_answers",
+        "e|tbl|public.watch_session_answers",
+        "n|rel|public.watch_session_answers",
+        "n|type|public.watch_session_answers",
+        "n|rel|public.watch_session_answers_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.watch_answer"
+      ]
     },
     {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_participants"
       ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "group_members_user_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "group_members"
+      "writes": [
+        "s|tbl|public.watch_session_participants",
+        "n|tbl|public.watch_session_participants",
+        "e|tbl|public.watch_session_participants",
+        "n|rel|public.watch_session_participants",
+        "n|type|public.watch_session_participants",
+        "n|rel|public.watch_session_participants_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.watch_session_role"
+      ]
     },
     {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "group_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "lower(\"nickname\")",
-          "isExpression": true,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_sessions"
       ],
-      "isUnique": true,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "group_members_nickname_key",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "group_members"
+      "writes": [
+        "s|tbl|public.watch_sessions",
+        "n|tbl|public.watch_sessions",
+        "e|tbl|public.watch_sessions",
+        "n|rel|public.watch_sessions",
+        "n|type|public.watch_sessions",
+        "n|rel|public.watch_sessions_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
     },
     {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "group_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": true,
-      "where": "\"role\" = 'owner'",
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "group_members_one_owner_key",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "genre_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "movie_genres_genre_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "vote_count",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "movies_vote_count_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "movies"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "sessions_user_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "identifier",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "verifications_identifier_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "verifications"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "watch_session_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": true,
-      "where": "\"removed_at\" is null",
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "watch_session_participants_current_key",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "watch_session_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": true,
-      "where": "\"role\" = 'host'",
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "watch_session_participants_one_host_key",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "user_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "watch_session_participants_user_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "watch_session_participants"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "group_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": true,
-      "where": "\"closed_at\" is null",
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "watch_sessions_one_active_key",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "group_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "watch_sessions_group_id_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "watch_sessions"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "accounts_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "accounts"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "actions_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "movie_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "movies",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
-      "name": "actions_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "actions"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "group_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "groups",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "group_members_group_id_groups_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "group_members_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "group_members"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "group_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "groups",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "group_past_matches_group_id_groups_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "group_past_matches"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "movie_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "movies",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
-      "name": "group_past_matches_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "group_past_matches"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "invite_lookup_limits_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "invite_lookup_limits"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "movie_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "movies",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "movie_genres_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "genre_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "genres",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "movie_genres_genre_id_genres_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "movie_genres"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "seen_movies_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "movie_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "movies",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
-      "name": "seen_movies_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "seen_movies"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "sessions_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "sessions"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "participation_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "watch_session_participants",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "watch_session_answers_jw9DrTKxzOh4_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "movie_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "movies",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
-      "name": "watch_session_answers_movie_id_movies_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "watch_session_answers"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
         "watch_session_id"
       ],
-      "schemaTo": "public",
-      "tableTo": "watch_sessions",
-      "columnsTo": [
-        "id"
+      "writes": [
+        "s|col|public.actions.watch_session_id",
+        "n|col|public.actions.watch_session_id",
+        "e|col|public.actions.watch_session_id"
       ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "watch_session_participants_j1AHKgVxp5h8_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "watch_session_participants"
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "nameExplicit": false,
-      "columns": [
-        "user_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "participation_id"
       ],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": [
-        "id"
+      "writes": [
+        "s|col|public.actions.participation_id",
+        "n|col|public.actions.participation_id",
+        "e|col|public.actions.participation_id"
       ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "watch_session_participants_user_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "watch_session_participants"
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "nameExplicit": false,
-      "columns": [
-        "group_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "max_runtime"
       ],
-      "schemaTo": "public",
-      "tableTo": "groups",
-      "columnsTo": [
-        "id"
+      "writes": [
+        "s|col|public.actions.max_runtime",
+        "n|col|public.actions.max_runtime",
+        "e|col|public.actions.max_runtime"
       ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "watch_sessions_group_id_groups_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "watch_sessions"
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "group_id",
-        "user_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "min_year"
       ],
-      "nameExplicit": false,
-      "name": "group_members_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "group_members"
+      "writes": [
+        "s|col|public.actions.min_year",
+        "n|col|public.actions.min_year",
+        "e|col|public.actions.min_year"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "group_id",
-        "movie_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "max_year"
       ],
-      "nameExplicit": false,
-      "name": "group_past_matches_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "group_past_matches"
+      "writes": [
+        "s|col|public.actions.max_year",
+        "n|col|public.actions.max_year",
+        "e|col|public.actions.max_year"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "movie_id",
-        "genre_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "genre_ids"
       ],
-      "nameExplicit": false,
-      "name": "movie_genres_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "movie_genres"
+      "writes": [
+        "s|col|public.actions.genre_ids",
+        "n|col|public.actions.genre_ids",
+        "e|col|public.actions.genre_ids"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "user_id",
-        "movie_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "replaced_watch_session_id"
       ],
-      "nameExplicit": false,
-      "name": "seen_movies_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "seen_movies"
+      "writes": [
+        "s|col|public.actions.replaced_watch_session_id",
+        "n|col|public.actions.replaced_watch_session_id",
+        "e|col|public.actions.replaced_watch_session_id"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "participation_id",
-        "movie_id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "actions",
+        "undone_by_action_id"
       ],
-      "nameExplicit": false,
-      "name": "watch_session_answers_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "watch_session_answers"
+      "writes": [
+        "s|col|public.actions.undone_by_action_id",
+        "n|col|public.actions.undone_by_action_id",
+        "e|col|public.actions.undone_by_action_id"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "seen_movies",
+        "last_confirmed_by_action"
       ],
-      "nameExplicit": false,
-      "name": "accounts_pkey",
-      "schema": "public",
-      "table": "accounts",
-      "entityType": "pks"
+      "writes": [
+        "s|col|public.seen_movies.last_confirmed_by_action",
+        "n|col|public.seen_movies.last_confirmed_by_action",
+        "e|col|public.seen_movies.last_confirmed_by_action"
+      ],
+      "reads": [
+        "n|tbl|public.seen_movies",
+        "n|sch|public"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "actions",
+        "actions_participation_id_idx"
       ],
-      "nameExplicit": false,
-      "name": "actions_pkey",
-      "schema": "public",
-      "table": "actions",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.actions_participation_id_idx",
+        "n|idx|public.actions_participation_id_idx",
+        "e|idx|public.actions_participation_id_idx",
+        "n|rel|public.actions_participation_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.actions",
+        "n|sch|public",
+        "n|col|public.actions.participation_id",
+        "n|col|public.actions.created_at"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "movies",
+        "movies_vote_count_idx"
       ],
-      "nameExplicit": false,
-      "name": "genres_pkey",
-      "schema": "public",
-      "table": "genres",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.movies_vote_count_idx",
+        "n|idx|public.movies_vote_count_idx",
+        "e|idx|public.movies_vote_count_idx",
+        "n|rel|public.movies_vote_count_idx"
+      ],
+      "reads": [
+        "n|tbl|public.movies",
+        "n|sch|public",
+        "n|col|public.movies.vote_count"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "watch_session_participants",
+        "watch_session_participants_current_key"
       ],
-      "nameExplicit": false,
-      "name": "groups_pkey",
-      "schema": "public",
-      "table": "groups",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.watch_session_participants_current_key",
+        "n|idx|public.watch_session_participants_current_key",
+        "e|idx|public.watch_session_participants_current_key",
+        "n|rel|public.watch_session_participants_current_key"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|col|public.watch_session_participants.watch_session_id",
+        "n|col|public.watch_session_participants.user_id"
+      ]
     },
     {
-      "columns": [
-        "user_id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "watch_session_participants",
+        "watch_session_participants_one_host_key"
       ],
-      "nameExplicit": false,
-      "name": "invite_lookup_limits_pkey",
-      "schema": "public",
-      "table": "invite_lookup_limits",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.watch_session_participants_one_host_key",
+        "n|idx|public.watch_session_participants_one_host_key",
+        "e|idx|public.watch_session_participants_one_host_key",
+        "n|rel|public.watch_session_participants_one_host_key"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|col|public.watch_session_participants.watch_session_id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "watch_session_participants",
+        "watch_session_participants_user_id_idx"
       ],
-      "nameExplicit": false,
-      "name": "movies_pkey",
-      "schema": "public",
-      "table": "movies",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.watch_session_participants_user_id_idx",
+        "n|idx|public.watch_session_participants_user_id_idx",
+        "e|idx|public.watch_session_participants_user_id_idx",
+        "n|rel|public.watch_session_participants_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|col|public.watch_session_participants.user_id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "watch_sessions",
+        "watch_sessions_one_active_key"
       ],
-      "nameExplicit": false,
-      "name": "rate_limits_pkey",
-      "schema": "public",
-      "table": "rate_limits",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.watch_sessions_one_active_key",
+        "n|idx|public.watch_sessions_one_active_key",
+        "e|idx|public.watch_sessions_one_active_key",
+        "n|rel|public.watch_sessions_one_active_key"
+      ],
+      "reads": [
+        "n|tbl|public.watch_sessions",
+        "n|sch|public",
+        "n|col|public.watch_sessions.group_id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "watch_sessions",
+        "watch_sessions_group_id_idx"
       ],
-      "nameExplicit": false,
-      "name": "sessions_pkey",
-      "schema": "public",
-      "table": "sessions",
-      "entityType": "pks"
+      "writes": [
+        "s|idx|public.watch_sessions_group_id_idx",
+        "n|idx|public.watch_sessions_group_id_idx",
+        "e|idx|public.watch_sessions_group_id_idx",
+        "n|rel|public.watch_sessions_group_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.watch_sessions",
+        "n|sch|public",
+        "n|col|public.watch_sessions.group_id"
+      ]
     },
     {
-      "columns": [
-        "email"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "group_past_matches"
       ],
-      "nameExplicit": false,
-      "name": "sign_in_code_limits_pkey",
-      "schema": "public",
-      "table": "sign_in_code_limits",
-      "entityType": "pks"
+      "writes": [
+        "s|fk|public.group_past_matches.group_past_matches_group_id_groups_id_fkey",
+        "n|fk|public.group_past_matches.group_past_matches_group_id_groups_id_fkey",
+        "e|fk|public.group_past_matches.group_past_matches_group_id_groups_id_fkey",
+        "n|con|public.group_past_matches.group_past_matches_group_id_groups_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.group_past_matches",
+        "n|sch|public",
+        "n|tbl|public.groups",
+        "n|sch|public",
+        "n|col|public.group_past_matches.group_id",
+        "n|col|public.groups.id",
+        "e|uniqueness|public.groups.id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "group_past_matches"
       ],
-      "nameExplicit": false,
-      "name": "users_pkey",
-      "schema": "public",
-      "table": "users",
-      "entityType": "pks"
+      "writes": [
+        "s|fk|public.group_past_matches.group_past_matches_movie_id_movies_id_fkey",
+        "n|fk|public.group_past_matches.group_past_matches_movie_id_movies_id_fkey",
+        "e|fk|public.group_past_matches.group_past_matches_movie_id_movies_id_fkey",
+        "n|con|public.group_past_matches.group_past_matches_movie_id_movies_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.group_past_matches",
+        "n|sch|public",
+        "n|tbl|public.movies",
+        "n|sch|public",
+        "n|col|public.group_past_matches.movie_id",
+        "n|col|public.movies.id",
+        "e|uniqueness|public.movies.id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_answers"
       ],
-      "nameExplicit": false,
-      "name": "verifications_pkey",
-      "schema": "public",
-      "table": "verifications",
-      "entityType": "pks"
+      "writes": [
+        "s|fk|public.watch_session_answers.watch_session_answers_jw9DrTKxzOh4_fkey",
+        "n|fk|public.watch_session_answers.watch_session_answers_jw9DrTKxzOh4_fkey",
+        "e|fk|public.watch_session_answers.watch_session_answers_jw9DrTKxzOh4_fkey",
+        "n|con|public.watch_session_answers.watch_session_answers_jw9DrTKxzOh4_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_answers",
+        "n|sch|public",
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|col|public.watch_session_answers.participation_id",
+        "n|col|public.watch_session_participants.id",
+        "e|uniqueness|public.watch_session_participants.id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_answers"
       ],
-      "nameExplicit": false,
-      "name": "watch_session_participants_pkey",
-      "schema": "public",
-      "table": "watch_session_participants",
-      "entityType": "pks"
+      "writes": [
+        "s|fk|public.watch_session_answers.watch_session_answers_movie_id_movies_id_fkey",
+        "n|fk|public.watch_session_answers.watch_session_answers_movie_id_movies_id_fkey",
+        "e|fk|public.watch_session_answers.watch_session_answers_movie_id_movies_id_fkey",
+        "n|con|public.watch_session_answers.watch_session_answers_movie_id_movies_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_answers",
+        "n|sch|public",
+        "n|tbl|public.movies",
+        "n|sch|public",
+        "n|col|public.watch_session_answers.movie_id",
+        "n|col|public.movies.id",
+        "e|uniqueness|public.movies.id"
+      ]
     },
     {
-      "columns": [
-        "id"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_participants"
       ],
-      "nameExplicit": false,
-      "name": "watch_sessions_pkey",
-      "schema": "public",
-      "table": "watch_sessions",
-      "entityType": "pks"
+      "writes": [
+        "s|fk|public.watch_session_participants.watch_session_participants_j1AHKgVxp5h8_fkey",
+        "n|fk|public.watch_session_participants.watch_session_participants_j1AHKgVxp5h8_fkey",
+        "e|fk|public.watch_session_participants.watch_session_participants_j1AHKgVxp5h8_fkey",
+        "n|con|public.watch_session_participants.watch_session_participants_j1AHKgVxp5h8_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|tbl|public.watch_sessions",
+        "n|sch|public",
+        "n|col|public.watch_session_participants.watch_session_id",
+        "n|col|public.watch_sessions.id",
+        "e|uniqueness|public.watch_sessions.id"
+      ]
     },
     {
-      "nameExplicit": false,
-      "columns": [
-        "invite_code"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_session_participants"
       ],
-      "nullsNotDistinct": false,
-      "name": "groups_invite_code_key",
-      "schema": "public",
-      "table": "groups",
-      "entityType": "uniques"
+      "writes": [
+        "s|fk|public.watch_session_participants.watch_session_participants_user_id_users_id_fkey",
+        "n|fk|public.watch_session_participants.watch_session_participants_user_id_users_id_fkey",
+        "e|fk|public.watch_session_participants.watch_session_participants_user_id_users_id_fkey",
+        "n|con|public.watch_session_participants.watch_session_participants_user_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.watch_session_participants",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.watch_session_participants.user_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
     },
     {
-      "nameExplicit": false,
-      "columns": [
-        "key"
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "watch_sessions"
       ],
-      "nullsNotDistinct": false,
-      "name": "rate_limits_key_key",
-      "schema": "public",
-      "table": "rate_limits",
-      "entityType": "uniques"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "token"
+      "writes": [
+        "s|fk|public.watch_sessions.watch_sessions_group_id_groups_id_fkey",
+        "n|fk|public.watch_sessions.watch_sessions_group_id_groups_id_fkey",
+        "e|fk|public.watch_sessions.watch_sessions_group_id_groups_id_fkey",
+        "n|con|public.watch_sessions.watch_sessions_group_id_groups_id_fkey"
       ],
-      "nullsNotDistinct": false,
-      "name": "sessions_token_key",
-      "schema": "public",
-      "table": "sessions",
-      "entityType": "uniques"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
-      "nullsNotDistinct": false,
-      "name": "users_email_key",
-      "schema": "public",
-      "table": "users",
-      "entityType": "uniques"
+      "reads": [
+        "n|tbl|public.watch_sessions",
+        "n|sch|public",
+        "n|tbl|public.groups",
+        "n|sch|public",
+        "n|col|public.watch_sessions.group_id",
+        "n|col|public.groups.id",
+        "e|uniqueness|public.groups.id"
+      ]
     }
   ],
-  "renames": []
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "group_past_matches",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "watch_session_answers",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "watch_session_participants",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "watch_sessions",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "watch_answer",
+        "values": [
+          "seen",
+          "not_seen"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "watch_session_role",
+        "values": [
+          "host",
+          "guest"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "watch_session_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "participation_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "max_runtime",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "min_year",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "max_year",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "genre_ids",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 1,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "replaced_watch_session_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "undone_by_action_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "group_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "movie_id",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "recorded_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "seen_movies",
+        "name": "last_confirmed_by_action",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "participation_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "movie_id",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "answer",
+        "type": "watch_answer",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "answered_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "user_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "role",
+        "type": "watch_session_role",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "joined_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "removed_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "group_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "max_runtime",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "min_year",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "max_year",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "genre_ids",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 1,
+        "default": "'{}'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "revision",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "last_activity_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "closed_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "actions",
+        "name": "actions_participation_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "participation_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "created_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"participation_id\" is not null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "movies",
+        "name": "movies_vote_count_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "vote_count",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_current_key",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "watch_session_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": "\"removed_at\" is null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_one_host_key",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "watch_session_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": "\"role\" = 'host'",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_user_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "watch_sessions_one_active_key",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "group_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": "\"closed_at\" is null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "watch_sessions_group_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "group_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "group_past_matches_group_id_groups_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "group_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "groups",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "group_past_matches_movie_id_movies_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "movie_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "movies",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "watch_session_answers_jw9DrTKxzOh4_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "participation_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "watch_session_participants",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "watch_session_answers_movie_id_movies_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "movie_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "movies",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_j1AHKgVxp5h8_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "watch_session_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "watch_sessions",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_user_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "watch_sessions_group_id_groups_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "group_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "groups",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "group_past_matches",
+        "name": "group_past_matches_pkey",
+        "columns": [
+          "group_id",
+          "movie_id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_answers",
+        "name": "watch_session_answers_pkey",
+        "columns": [
+          "participation_id",
+          "movie_id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_session_participants",
+        "name": "watch_session_participants_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "watch_sessions",
+        "name": "watch_sessions_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "enums\u0000[\"public\",\"action_type\"]",
+      "set": {
+        "values": [
+          "seen_list_add",
+          "seen_list_remove",
+          "group_create",
+          "group_join",
+          "group_leave",
+          "group_rename",
+          "group_delete",
+          "group_reset_invite",
+          "group_remove_member",
+          "group_set_nickname",
+          "watch_session_start",
+          "watch_session_end",
+          "watch_answer_seen",
+          "watch_answer_not_seen",
+          "watch_answer_undo"
+        ]
+      }
+    }
+  ]
 }
