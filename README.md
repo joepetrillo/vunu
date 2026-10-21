@@ -4,13 +4,11 @@ Finds movies nobody in a group has seen. The current application has email-code 
 
 Live domain: [vunu.app](https://vunu.app). `www.vunu.app` redirects there. Repository: [joepetrillo/vunu](https://github.com/joepetrillo/vunu).
 
-SvelteKit 3.1.0 stable, Svelte 5, TypeScript, Drizzle 1.0.0-rc.4, Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter 7.0.1. The audit fixes, stable framework upgrade, and Vunu rebrand are implemented. The [audit](docs/AUDIT.md) records historical versions, source references, verification, and rollout notes; `bun.lock` records current resolved versions. [AGENTS.md](AGENTS.md) holds contributor conventions.
-
-Stages 1–8 of 10 are done; stage 8 (the group deck) replaced watch sessions. Stage 9, the full catalog sync, is built: a GitHub Actions workflow runs `bun run catalog:sync` against Production every 2 days, and its first run loads the full catalog (until then the live catalog is a 300-movie seed). Then stage 10, launch. Status and what's left: [Current state](docs/PROJECT_SPEC.md#current-state).
+SvelteKit 3, Svelte 5, TypeScript, Drizzle v1 (RC), Neon Postgres through `pg`, Better Auth, Resend, and Vercel's Node adapter; `bun.lock` has exact versions. [AGENTS.md](AGENTS.md) holds contributor conventions. Status and what's left: [Current state](docs/PROJECT_SPEC.md#current-state).
 
 ## Development setup
 
-Requires **Node 24.x**, [Bun](https://bun.sh), and the Vercel CLI for the existing project's Development environment. Use the committed lockfile. The audit used Node 24.19.0 and Bun 1.4.2; Bun is not pinned yet.
+Requires **Node 24.x**, [Bun](https://bun.sh), and the Vercel CLI for the existing project's Development environment. Use the committed lockfile. Bun is not pinned yet.
 
 ```sh
 bun install --frozen-lockfile
