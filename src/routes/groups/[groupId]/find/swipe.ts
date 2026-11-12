@@ -1,4 +1,5 @@
 import type { Attachment } from "svelte/attachments";
+import { on } from "svelte/events";
 
 import { EASE_OUT_STRONG_CSS } from "#lib/motion.ts";
 
@@ -217,16 +218,16 @@ export function swipe(options: Options): Attachment<HTMLElement> {
       settle();
     }
 
-    card.addEventListener("pointerdown", onpointerdown);
-    card.addEventListener("pointermove", onpointermove);
-    card.addEventListener("pointerup", onpointerup);
-    card.addEventListener("pointercancel", onpointercancel);
+    // `on` (svelte/events) returns the function that removes its listener.
+    const off = [
+      on(card, "pointerdown", onpointerdown),
+      on(card, "pointermove", onpointermove),
+      on(card, "pointerup", onpointerup),
+      on(card, "pointercancel", onpointercancel),
+    ];
     return () => {
       // Listeners only: an answered card keeps its position for its exit.
-      card.removeEventListener("pointerdown", onpointerdown);
-      card.removeEventListener("pointermove", onpointermove);
-      card.removeEventListener("pointerup", onpointerup);
-      card.removeEventListener("pointercancel", onpointercancel);
+      for (const remove of off) remove();
       stopSnapBack();
     };
   };

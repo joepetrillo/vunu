@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { db } from "#lib/server/db/index.ts";
 import { genres, movies, seenMovies } from "#lib/server/db/schema.ts";
+import { readFields, RELOAD } from "#lib/server/forms.ts";
 import { MAX_PAGE, searchMovies } from "#lib/server/movie-search.ts";
 import { requireUser } from "#lib/server/require-user.ts";
 import { addToSeenList, removeFromSeenList } from "#lib/server/seen-list.ts";
@@ -72,28 +73,16 @@ async function changeSeenList(
   change: typeof addToSeenList
 ) {
   const user = requireUser(locals);
-  // Malformed multipart bodies can fail before Zod sees any fields.
-  const fields = await request.formData().catch((error: unknown) => {
-    if (error instanceof TypeError) return null;
-    throw error;
-  });
+  const fields = await readFields(request);
   const form = seenListFormSchema.safeParse(
     fields === null ? null : Object.fromEntries(fields)
   );
-  if (!form.success) {
-    return fail(400, {
-      message: "Something went wrong. Reload the page and try again.",
-    });
-  }
+  if (!form.success) return fail(400, { message: RELOAD });
 
   try {
     const outcome = await change(db, { userId: user.id, ...form.data });
     // Only a bug or a tampered request reuses an action ID for something else.
-    if (outcome === "conflict") {
-      return fail(409, {
-        message: "Something went wrong. Reload the page and try again.",
-      });
-    }
+    if (outcome === "conflict") return fail(409, { message: RELOAD });
     // "applied" and "duplicate" both mean the change is saved; a duplicate was
     // a retry of a request that already succeeded.
   } catch (error) {
