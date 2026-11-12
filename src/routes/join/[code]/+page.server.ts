@@ -3,9 +3,9 @@ import { z } from "zod";
 
 import { inviteCodeSchema, nicknameSchema } from "#lib/group-fields.ts";
 import { db } from "#lib/server/db/index.ts";
+import { readForm } from "#lib/server/forms.ts";
 import {
   findInvite,
-  readForm,
   refusal,
   refusalMessage,
 } from "#lib/server/group-forms.ts";

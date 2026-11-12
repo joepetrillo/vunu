@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Attachment } from "svelte/attachments";
   import type { HTMLInputAttributes } from "svelte/elements";
+  import { on } from "svelte/events";
 
   import { cn } from "#lib/utils.ts";
 
@@ -89,11 +90,9 @@
         input.setSelectionRange(end, end);
       }
     }
-    // Text fields report selection changes on the document.
-    document.addEventListener("selectionchange", collapse);
-    return () => {
-      document.removeEventListener("selectionchange", collapse);
-    };
+    // Text fields report selection changes on the document. `on` returns
+    // the function that removes the listener, which is the cleanup.
+    return on(document, "selectionchange", collapse);
   };
 </script>
 

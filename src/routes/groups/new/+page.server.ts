@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { groupNameSchema, nicknameSchema } from "#lib/group-fields.ts";
 import { db } from "#lib/server/db/index.ts";
-import { readForm, refusal } from "#lib/server/group-forms.ts";
+import { readForm } from "#lib/server/forms.ts";
+import { refusal } from "#lib/server/group-forms.ts";
 import { createGroup, lastNickname } from "#lib/server/groups.ts";
 import { requireUser } from "#lib/server/require-user.ts";
 
