@@ -3,13 +3,11 @@ import { z } from "zod";
 
 import { inviteCodeSchema } from "#lib/group-fields.ts";
 import { db } from "#lib/server/db/index.ts";
-import { RELOAD } from "#lib/server/forms.ts";
-import { readForm } from "#lib/server/forms.ts";
+import { readFields, readForm, RELOAD } from "#lib/server/forms.ts";
 import { type GroupOutcome, previewInvite } from "#lib/server/groups.ts";
-// Shared by the group pages' form actions.
 import { requireUser } from "#lib/server/require-user.ts";
 
-export { readForm };
+// Shared by the group pages' form actions.
 
 export const INACTIVE_CODE = "That's not an active invite code.";
 
@@ -66,11 +64,7 @@ export async function findInvite({
   locals: App.Locals;
 }) {
   const user = requireUser(locals);
-  // Like readForm: only a malformed body is the person's input problem.
-  const fields = await request.formData().catch((error: unknown) => {
-    if (error instanceof TypeError) return null;
-    throw error;
-  });
+  const fields = await readFields(request);
   const code = inviteCodeSchema.safeParse(fields?.get("code"));
   if (!code.success) return fail(400, { codeError: INACTIVE_CODE });
 

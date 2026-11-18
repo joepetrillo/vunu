@@ -95,6 +95,19 @@
     });
   });
 
+  // The answer buttons, and the labels a dragged card shows. Not seen is on
+  // the left and Seen on the right in both (and the dating-app habit people
+  // bring: right keeps it moving); a card dragged right uncovers the label
+  // on its left edge.
+  const CHOICES = [
+    { answer: "not_seen", label: "Not seen" },
+    { answer: "seen", label: "Seen" },
+  ] as const;
+  const SWIPE_HINTS = [
+    { answer: "seen", label: "Seen", side: "left-4" },
+    { answer: "not_seen", label: "Not seen", side: "right-4" },
+  ] as const;
+
   // Whether the card on screen can be answered, by button or by swipe.
   let answerable = $derived(
     deck.card !== undefined &&
@@ -278,7 +291,7 @@
             <!-- Fade in while the card is dragged toward an answer (the
                  swipe sets their opacity). Words only: Vunu asks what
                  you've seen, not what you like. -->
-            {#each [{ answer: "seen", label: "Seen", side: "left-4" }, { answer: "not_seen", label: "Not seen", side: "right-4" }] as const as hint (hint.answer)}
+            {#each SWIPE_HINTS as hint (hint.answer)}
               <span
                 data-swipe-label={hint.answer}
                 aria-hidden="true"
@@ -382,11 +395,9 @@
       {/if}
     </div>
 
-    <!-- Two equal buttons: Vunu asks what you've seen, not what you like.
-         Not seen on the left, Seen on the right, like the swipe (and the
-         dating-app habit people bring: right keeps it moving). -->
+    <!-- Two equal buttons: Vunu asks what you've seen, not what you like. -->
     <div class="grid grid-cols-2 gap-3">
-      {#each [{ answer: "not_seen", label: "Not seen" }, { answer: "seen", label: "Seen" }] as const as choice (choice.answer)}
+      {#each CHOICES as choice (choice.answer)}
         <Button
           variant="secondary"
           class="h-16 text-lg"
